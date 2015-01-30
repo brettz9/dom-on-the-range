@@ -10,7 +10,7 @@ if (exports) {
     window = document.parentWindow;
 }
 
-// Todo: export a constructor which allows default regex (and node?)
+// Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
 
 /**
 * @param {RegExp|string} splitRegex Note that this regular expression is currently required to be continguous within a text node
@@ -69,7 +69,7 @@ function splitFormattedText (splitRegex, range) {
 var exp = (exports === undef) ? window : exports;
 exp.DOTR = {
     splitFormattedText: splitFormattedText
-    // exec, test, match, replace, search, forEach, etc.
+    // todo: exec, test, match, replace, search, forEach, etc.
 };
 
 
