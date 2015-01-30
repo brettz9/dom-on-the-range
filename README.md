@@ -3,6 +3,12 @@ Converts regular expressions into safe DOM ranges (**Project not complete!**)
 
 "Oh, give me a DOM where the wildcards can roam, and the markup won't wander and stray..."
 
+# Installation
+
+# Usage
+
+
+
 # Todos
 1. Get to work across text nodes and element nodes as per http://http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a-dom-range
 2. Get to work within text, comment, CDATA, or processing instruction nodes

@@ -1,0 +1,25 @@
+{
+    "name": "dotr",
+    "title": "DOM on the Range",
+    "id": "dom-on-the-range@brett.zamir",
+    "version": "0.1.0",
+    "main": "index.js",
+    "license": "MIT",
+    "author": "Brett Zamir",
+    "contributors": [],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/brettz9/dom-on-the-range.git"
+    },
+    "dependencies": {
+        "regexp-clone": "git+https://git@github.com/brettz9/regexp-clone#master",
+        "handle-node": "git+https://git@github.com/brettz9/handle-node#master",
+        "rangy": "1.x",
+        "jsdom": "3.x"
+    },
+    "bugs": "https://github.com/brettz9/dom-on-the-range/issues",
+    "description": "Converts regular expressions into safe DOM ranges",
+    "keywords": [
+        "dom", "range", "regex"
+    ]
+}
