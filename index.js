@@ -9,6 +9,19 @@ if (exports) { // Todo: Implement pseudo-Range for jsdom or wait on https://gith
     window = document.parentWindow;
 }
 
+function splitSafeRegex (splitRegex) {
+    return typeof splitRegex === 'string' ? new RegExp(splitRegex) : cloneRegex(splitRegex, {global: false});
+}
+
+function splitNodeExternal (node, splitRegex, range) {
+    range = range || document.createRange();
+    
+    splitRegex = splitSafeRegex(splitRegex);
+    
+    // Todo
+    
+}
+
 // Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
 
 /**
@@ -20,7 +33,7 @@ if (exports) { // Todo: Implement pseudo-Range for jsdom or wait on https://gith
 function splitNodeInternal (node, splitRegex, range) {
     range = range || document.createRange();
     
-    splitRegex = typeof splitRegex === 'string' ? new RegExp(splitRegex) : cloneRegex(splitRegex, {global: false});
+    splitRegex = splitSafeRegex(splitRegex);
     
     function extractInnerMatches (range, node, splitRegex) {
         function extractFoundMatches (arr, node) {
@@ -60,6 +73,12 @@ function splitNodeInternal (node, splitRegex, range) {
     return extractInnerMatches(range, node, splitRegex);
 }
 
+function split (node, splitRegex, range, nodeInternal) {
+    if (nodeInternal) {
+        return splitNodeInternal(node, splitRegex, range);
+    }
+    return splitNodeExternal(node, splitRegex, range);
+}
 
 // EXPORTS
 
@@ -73,7 +92,10 @@ if (exports === undef) {
 else {
     exp = exports;
 }
+
+exp.splitNodeExternal = splitNodeExternal;
 exp.splitNodeInternal = splitNodeInternal;
+exp.split = split;
 
 // todo: exec, test, match, replace, search, forEach, etc. (nodeInternal and nodeIndependent)
 
