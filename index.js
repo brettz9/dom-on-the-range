@@ -32,6 +32,8 @@ function splitBounded (splitRegex, node) {
     
     splitRegex = getSplitSafeRegex(splitRegex);
     
+    node = node.cloneNode(true);
+    
     function extractInnerMatches (range, splitRegex, node) {
         function extractFoundMatches (arr, node) {
             var found = extractInnerMatches(range, splitRegex, node);
