@@ -23,20 +23,22 @@ function getSplitSafeRegex (regex) {
 
 /**
 * @param {Node} node The node out of which to extract
-* @param {RegExp|string} splitRegex Note that this regular expression is currently required to be continguous within a text node
-* @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the splitRegex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the splitRegex match (with the matching splitRegex's removed) and whose "post" property will be set to the remainder after the match.
+* @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
+* @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
 * @todo We could add an argument to allow splitting which adds the split nodes
+* @todo Give option to add to fragment instead of array
+* @todo Give options to search within comments, etc.?
 */
-function splitBounded (splitRegex, node) {
+function splitBounded (regex, node) {
     var range = document.createRange();
     
-    splitRegex = getSplitSafeRegex(splitRegex);
+    regex = getSplitSafeRegex(regex);
     
     node = node.cloneNode(true);
     
-    function extractInnerMatches (range, splitRegex, node) {
+    function extractInnerMatches (range, regex, node) {
         function extractFoundMatches (arr, node) {
-            var found = extractInnerMatches(range, splitRegex, node);
+            var found = extractInnerMatches(range, regex, node);
             if (found && found.pre) {
                 arr = arr.concat(found.pre);
                 return extractFoundMatches(arr, found.post); // Keep splitting
@@ -50,13 +52,13 @@ function splitBounded (splitRegex, node) {
             },
             text: function (node) {
                 var contents = node.nodeValue;
-                var matchStart = contents.search(splitRegex);
+                var matchStart = contents.search(regex);
                 if (matchStart === -1) {
                     return node;
                 }
 
                 // Grab desired contents with known positions before discarding the split text
-                var matchEnd = matchStart + contents.match(splitRegex)[0].length;
+                var matchEnd = matchStart + contents.match(regex)[0].length;
                 
                 range.setStart(node, matchStart);
                 range.setEnd(node, matchEnd);
@@ -69,15 +71,15 @@ function splitBounded (splitRegex, node) {
             }
         });
     }
-    return extractInnerMatches(range, splitRegex, node);
+    return extractInnerMatches(range, regex, node);
 }
 
-function splitUnbounded (splitRegex, node) {
+function splitUnbounded (regex, node) {
     var range = document.createRange();
     
-    splitRegex = getSplitSafeRegex(splitRegex);
+    regex = getSplitSafeRegex(regex);
     
-    
+    // Todo
 }
 
 function split (regex, node, nodeBounded) {
@@ -87,10 +89,28 @@ function split (regex, node, nodeBounded) {
     return splitUnbounded(regex, node);
 }
 
-// todo: For handleNode, add support for comment, etc., as needed
+// todo: For handleNode, add support for comment, etc., as needed on all methods
 
 function testBounded (regex, node) {
+    regex = getRegex(regex);
+    node = node.cloneNode(true);
     
+    function findInnerMatches (regex, node) {
+        function findMatches (node) {
+            return findInnerMatches(regex, node);
+        }
+
+        return handleNode(node, {
+            element: function (node) {
+                return Array.some(node.childNodes).reduce(findMatches);
+            },
+            text: function (node) {
+                var contents = node.nodeValue;
+                return regex.test(contents);
+            }
+        });
+    }
+    return findInnerMatches(regex, node);
 }
 
 function testUnbounded (regex, node) {
