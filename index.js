@@ -2,21 +2,25 @@
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
 
-if (exports) { // Todo: Implement pseudo-Range for jsdom or wait on https://github.com/tmpvar/jsdom/issues/317
+if (exports) { // Todo: Implement pseudo-Range for jsdom to get working with Node.js or wait on https://github.com/tmpvar/jsdom/issues/317
     cloneRegex = require('regexp-clone');
     handleNode = require('handle-node');
     document = require('jsdom').jsdom('');
     window = document.parentWindow;
 }
 
-function splitSafeRegex (splitRegex) {
-    return typeof splitRegex === 'string' ? new RegExp(splitRegex) : cloneRegex(splitRegex, {global: false});
+function getRegex () {
+    return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex);
+}
+
+function getSplitSafeRegex (regex) {
+    return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex, {global: false});
 }
 
 function splitNodeExternal (node, splitRegex, range) {
     range = range || document.createRange();
     
-    splitRegex = splitSafeRegex(splitRegex);
+    splitRegex = getSplitSafeRegex(splitRegex);
     
     // Todo
     
@@ -33,7 +37,7 @@ function splitNodeExternal (node, splitRegex, range) {
 function splitNodeInternal (node, splitRegex, range) {
     range = range || document.createRange();
     
-    splitRegex = splitSafeRegex(splitRegex);
+    splitRegex = getSplitSafeRegex(splitRegex);
     
     function extractInnerMatches (range, node, splitRegex) {
         function extractFoundMatches (arr, node) {
@@ -80,9 +84,38 @@ function split (node, splitRegex, range, nodeInternal) {
     return splitNodeExternal(node, splitRegex, range);
 }
 
-// EXPORTS
+// todo: implement node-internal and node-independent versions of each of the following
 
-// Todo: Get working with Node via jsdom, etc.
+function test () {
+    
+}
+
+function match () {
+    
+}
+
+function replace (node, regex, range) {
+    regex = getRegex(regex);
+    if (splitRegex.global) {
+        
+    }
+}
+
+function search () {
+    
+}
+
+function exec () {
+    
+}
+
+function forEach () {
+    
+}
+
+// Todo: other array extras
+
+// EXPORTS
 
 var exp;
 if (exports === undef) {
@@ -96,8 +129,12 @@ else {
 exp.splitNodeExternal = splitNodeExternal;
 exp.splitNodeInternal = splitNodeInternal;
 exp.split = split;
-
-// todo: exec, test, match, replace, search, forEach, etc. (nodeInternal and nodeIndependent)
+exp.test = test;
+exp.match = match;
+exp.replace = replace;
+exp.search = search;
+exp.exec = exec;
+exp.forEach = forEach;
 
 
 }());
