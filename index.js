@@ -2,11 +2,10 @@
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
 
-if (exports) {
+if (exports) { // Todo: Implement Range with jsdom?
     cloneRegex = require('regexp-clone');
     handleNode = require('handle-node');
     document = require('jsdom').jsdom('');
-    document.createRange = require('rangy').createRange;
     window = document.parentWindow;
 }
 
@@ -65,11 +64,18 @@ function splitNodeInternal (node, splitRegex, range) {
 // EXPORTS
 
 // Todo: Get working with Node via jsdom, etc.
-var exp = (exports === undef) ? window : exports;
-exp.DOTR = {
-    splitNodeInternal: splitNodeInternal
-    // todo: exec, test, match, replace, search, forEach, etc.
-};
+
+var exp;
+if (exports === undef) {
+    window.DOTR = {};
+    exp = window.DOTR;
+}
+else {
+    exp = exports;
+}
+exp.splitNodeInternal = splitNodeInternal;
+
+// todo: exec, test, match, replace, search, forEach, etc. (nodeInternal and nodeIndependent)
 
 
 }());

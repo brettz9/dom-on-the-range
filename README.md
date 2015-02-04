@@ -1,7 +1,10 @@
 # dom-on-the-range
+
 Converts regular expressions into safe DOM ranges (**Project not complete!**)
 
-"Oh, give me a DOM where the wildcards can roam, and the markup won't wander and stray..."
+Currently for the browser only due to there apparently being no Range implementations in Node.
+
+"Oh, give me a DOM where the wildcards can roam, and the markup won't wander away..."
 
 # Installation
 
@@ -10,6 +13,7 @@ Converts regular expressions into safe DOM ranges (**Project not complete!**)
 
 
 # Todos
+
 1. Get to work across text nodes and element nodes as per http://http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a-dom-range
 2. Get to work within text, comment, CDATA, or processing instruction nodes
 3. Get to clone, extract, replace, or split portions of original node

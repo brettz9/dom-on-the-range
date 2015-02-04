@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>DOM-on-the-Range Testing</title>
+    <script src="../node_modules/regexp-clone/index.js"></script>
+    <script src="../node_modules/handle-node/index.js"></script>
+    <script src="../index.js"></script>
+</head>
+<body>
+
+<p>This is a test <b>and another test</b> and another <i>test</i>.</p>
+
+<script>
+alert( // document.body.appendChild(
+    DOTR.splitNodeInternal(document.body.cloneNode(true), /te.t/)
+);
+</script>
+
+</body>
+</html>
