@@ -43,6 +43,9 @@ function splitBounded (regex, node) {
                 arr = arr.concat(found.pre);
                 return extractFoundMatches(arr, found.post); // Keep splitting
             }
+            else if (found === undef) { // Ignore other nodes
+                return arr;
+            }
             return arr.concat(found); // Add remainder text or add descendant element nodes (note that regex match does not span nodes)
         }
 
