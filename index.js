@@ -77,20 +77,20 @@ function splitBounded (node, splitRegex) {
     return extractInnerMatches(range, node, splitRegex);
 }
 
-function split (node, regex, nodeBounded) {
+function split (regex, node, nodeBounded) {
     if (nodeBounded) {
-        return splitBounded(node, regex);
+        return splitBounded(regex, node);
     }
-    return splitUnbounded(node, regex);
+    return splitUnbounded(regex, node);
 }
 
 // todo: For handleNode, add support for comment, etc., as needed
 
-function testBounded (node, regex) {
+function testBounded (regex, node) {
     
 }
 
-function testUnbounded (node, regex) {
+function testUnbounded (regex, node) {
     return handleNode(node, {
         element: function (node) {
             return regex.test(node.textContent);
@@ -101,54 +101,54 @@ function testUnbounded (node, regex) {
     });
 }
 
-function test (node, regex, nodeBounded) {
+function test (regex, node, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return testBounded(node, regex);
+        return testBounded(regex, node);
     }
-    return testUnbounded(node, regex);
+    return testUnbounded(regex, node);
 }
 
-function matchBounded (node, regex) {
+function matchBounded (regex, node) {
     
 }
 
-function matchUnbounded (node, regex) {
+function matchUnbounded (regex, node) {
     
 }
 
-function match (node, regex, nodeBounded) {
+function match (regex, node, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return matchBounded(node, regex);
+        return matchBounded(regex, node);
     }
-    return matchUnbounded(node, regex);
+    return matchUnbounded(regex, node);
 }
 
-function replaceBounded (node, regex) {
+function replaceBounded (regex, node) {
     
 }
 
-function replaceUnbounded (node, regex) {
+function replaceUnbounded (regex, node) {
     
 }
 
-function replace (node, regex) {
+function replace (regex, node) {
     regex = getRegex(regex);
     if (regex.global) {
         
     }
     if (nodeBounded) {
-        return replaceBounded(node, regex);
+        return replaceBounded(regex, node);
     }
-    return replaceUnbounded(node, regex);
+    return replaceUnbounded(regex, node);
 }
 
-function searchBounded (node, regex) {
+function searchBounded (regex, node) {
     
 }
 
-function searchUnbounded (node, regex) {
+function searchUnbounded (regex, node) {
     return handleNode(node, {
         element: function (node) {
             return node.textContent.search(regex);
@@ -159,44 +159,44 @@ function searchUnbounded (node, regex) {
     });
 }
 
-function search (node, regex, nodeBounded) {
+function search (regex, node, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return searchBounded(node, regex);
+        return searchBounded(regex, node);
     }
-    return searchUnbounded(node, regex);
+    return searchUnbounded(regex, node);
 }
 
-function execBounded (node, regex) {
+function execBounded (regex, node) {
     
 }
 
-function execUnbounded (node, regex) {
+function execUnbounded (regex, node) {
     
 }
 
-function exec (node, regex, nodeBounded) {
+function exec (regex, node, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return searchBounded(node, regex);
+        return searchBounded(regex, node);
     }
-    return searchUnbounded(node, regex);
+    return searchUnbounded(regex, node);
 }
 
-function forEachBounded (node, regex, cb) {
+function forEachBounded (regex, node, cb) {
     
 }
 
-function forEachUnbounded (node, regex, cb) {
+function forEachUnbounded (regex, node, cb) {
     
 }
 
-function forEach (node, regex, cb, nodeBounded) {
+function forEach (regex, node, cb, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return forEachBounded(node, regex, cb);
+        return forEachBounded(regex, node, cb);
     }
-    return forEachUnbounded(node, regex, cb);
+    return forEachUnbounded(regex, node, cb);
 }
 
 // Todo: other array extras
