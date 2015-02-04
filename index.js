@@ -149,7 +149,14 @@ function searchBounded (node, regex) {
 }
 
 function searchUnbounded (node, regex) {
-    
+    return handleNode(node, {
+        element: function (node) {
+            return node.textContent.search(regex);
+        },
+        text: function (node) {
+            return node.nodeValue.search(regex);
+        }
+    });
 }
 
 function search (node, regex, nodeBounded) {
