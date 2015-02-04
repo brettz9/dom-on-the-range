@@ -17,25 +17,25 @@ function getSplitSafeRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex, {global: false});
 }
 
-function splitNodeExternal (node, splitRegex, range) {
-    range = range || document.createRange();
+
+// Todo all of the below (node-bounded and node-unbounded versions)!
+
+
+function splitUnbounded (node, splitRegex) {
+    var range = document.createRange();
     
     splitRegex = getSplitSafeRegex(splitRegex);
     
-    // Todo
     
 }
-
-// Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
 
 /**
 * @param {Node} node The node out of which to extract
 * @param {RegExp|string} splitRegex Note that this regular expression is currently required to be continguous within a text node
-* @param {DOMRange} [range] A DOM Range (defaults to a new `document.createRange()`).
 * @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the splitRegex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the splitRegex match (with the matching splitRegex's removed) and whose "post" property will be set to the remainder after the match.
 */
-function splitNodeInternal (node, splitRegex, range) {
-    range = range || document.createRange();
+function splitBounded (node, splitRegex) {
+    var range = document.createRange();
     
     splitRegex = getSplitSafeRegex(splitRegex);
     
@@ -77,40 +77,119 @@ function splitNodeInternal (node, splitRegex, range) {
     return extractInnerMatches(range, node, splitRegex);
 }
 
-function split (node, splitRegex, range, nodeInternal) {
-    if (nodeInternal) {
-        return splitNodeInternal(node, splitRegex, range);
+function split (node, regex, nodeBounded) {
+    if (nodeBounded) {
+        return splitBounded(node, regex);
     }
-    return splitNodeExternal(node, splitRegex, range);
+    return splitUnbounded(node, regex);
 }
 
-// todo: implement node-internal and node-independent versions of each of the following
+// todo: For handleNode, add support for comment, etc., as needed
 
-function test () {
+function testBounded (node, regex) {
     
 }
 
-function match () {
-    
+function testUnbounded (node, regex) {
+    return handleNode(node, {
+        element: function (node) {
+            return regex.test(node.textContent);
+        },
+        text: function (node) {
+            return regex.test(node.nodeValue);
+        }
+    });
 }
 
-function replace (node, regex, range) {
+function test (node, regex, nodeBounded) {
     regex = getRegex(regex);
-    if (splitRegex.global) {
+    if (nodeBounded) {
+        return testBounded(node, regex);
+    }
+    return testUnbounded(node, regex);
+}
+
+function matchBounded (node, regex) {
+    
+}
+
+function matchUnbounded (node, regex) {
+    
+}
+
+function match (node, regex, nodeBounded) {
+    regex = getRegex(regex);
+    if (nodeBounded) {
+        return matchBounded(node, regex);
+    }
+    return matchUnbounded(node, regex);
+}
+
+function replaceBounded (node, regex) {
+    
+}
+
+function replaceUnbounded (node, regex) {
+    
+}
+
+function replace (node, regex) {
+    regex = getRegex(regex);
+    if (regex.global) {
         
     }
+    if (nodeBounded) {
+        return replaceBounded(node, regex);
+    }
+    return replaceUnbounded(node, regex);
 }
 
-function search () {
+function searchBounded (node, regex) {
     
 }
 
-function exec () {
+function searchUnbounded (node, regex) {
     
 }
 
-function forEach () {
+function search (node, regex, nodeBounded) {
+    regex = getRegex(regex);
+    if (nodeBounded) {
+        return searchBounded(node, regex);
+    }
+    return searchUnbounded(node, regex);
+}
+
+function execBounded (node, regex) {
     
+}
+
+function execUnbounded (node, regex) {
+    
+}
+
+function exec (node, regex, nodeBounded) {
+    regex = getRegex(regex);
+    if (nodeBounded) {
+        return searchBounded(node, regex);
+    }
+    return searchUnbounded(node, regex);
+}
+
+function forEachBounded (node, regex, cb) {
+    
+}
+
+function forEachUnbounded (node, regex, cb) {
+    
+}
+
+function forEach (node, regex, cb, nodeBounded) {
+    regex = getRegex(regex);
+    if (nodeBounded) {
+        return forEachBounded(node, regex, cb);
+    }
+    return forEachUnbounded(node, regex, cb);
 }
 
 // Todo: other array extras
@@ -126,15 +205,35 @@ else {
     exp = exports;
 }
 
-exp.splitNodeExternal = splitNodeExternal;
-exp.splitNodeInternal = splitNodeInternal;
+// Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
+
+exp.splitUnbounded = splitUnbounded;
+exp.splitBounded = splitBounded;
 exp.split = split;
+
 exp.test = test;
+exp.testBounded = testBounded;
+exp.testUnbounded = testUnbounded;
+
 exp.match = match;
+exp.matchBounded = matchBounded;
+exp.matchUnbounded = matchUnbounded;
+
 exp.replace = replace;
+exp.replaceBounded = replaceBounded;
+exp.replaceUnbounded = replaceUnbounded;
+
 exp.search = search;
+exp.searchBounded = searchBounded;
+exp.searchUnbounded = searchUnbounded;
+
 exp.exec = exec;
+exp.execBounded = execBounded;
+exp.execUnbounded = execUnbounded;
+
 exp.forEach = forEach;
+exp.forEachBounded = forEachBounded;
+exp.forEachUnbounded = forEachUnbounded;
 
 
 }());
