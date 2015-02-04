@@ -9,7 +9,7 @@ if (exports) { // Todo: Implement pseudo-Range for jsdom to get working with Nod
     window = document.parentWindow;
 }
 
-function getRegex () {
+function getRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex);
 }
 
@@ -21,27 +21,19 @@ function getSplitSafeRegex (regex) {
 // Todo all of the below (node-bounded and node-unbounded versions)!
 
 
-function splitUnbounded (node, splitRegex) {
-    var range = document.createRange();
-    
-    splitRegex = getSplitSafeRegex(splitRegex);
-    
-    
-}
-
 /**
 * @param {Node} node The node out of which to extract
 * @param {RegExp|string} splitRegex Note that this regular expression is currently required to be continguous within a text node
 * @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the splitRegex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the splitRegex match (with the matching splitRegex's removed) and whose "post" property will be set to the remainder after the match.
 */
-function splitBounded (node, splitRegex) {
+function splitBounded (splitRegex, node) {
     var range = document.createRange();
     
     splitRegex = getSplitSafeRegex(splitRegex);
     
-    function extractInnerMatches (range, node, splitRegex) {
+    function extractInnerMatches (range, splitRegex, node) {
         function extractFoundMatches (arr, node) {
-            var found = extractInnerMatches(range, node, splitRegex);
+            var found = extractInnerMatches(range, splitRegex, node);
             if (found && found.pre) {
                 arr = arr.concat(found.pre);
                 return extractFoundMatches(arr, found.post); // Keep splitting
@@ -74,7 +66,15 @@ function splitBounded (node, splitRegex) {
             }
         });
     }
-    return extractInnerMatches(range, node, splitRegex);
+    return extractInnerMatches(range, splitRegex, node);
+}
+
+function splitUnbounded (splitRegex, node) {
+    var range = document.createRange();
+    
+    splitRegex = getSplitSafeRegex(splitRegex);
+    
+    
 }
 
 function split (regex, node, nodeBounded) {
@@ -125,23 +125,23 @@ function match (regex, node, nodeBounded) {
     return matchUnbounded(regex, node);
 }
 
-function replaceBounded (regex, node) {
+function replaceBounded (regex, node, replacementNode) {
     
 }
 
-function replaceUnbounded (regex, node) {
+function replaceUnbounded (regex, node, replacementNode) {
     
 }
 
-function replace (regex, node) {
+function replace (regex, node, replacementNode) {
     regex = getRegex(regex);
     if (regex.global) {
         
     }
     if (nodeBounded) {
-        return replaceBounded(regex, node);
+        return replaceBounded(regex, node, replacementNode);
     }
-    return replaceUnbounded(regex, node);
+    return replaceUnbounded(regex, node, replacementNode);
 }
 
 function searchBounded (regex, node) {
@@ -218,29 +218,29 @@ exp.splitUnbounded = splitUnbounded;
 exp.splitBounded = splitBounded;
 exp.split = split;
 
-exp.test = test;
 exp.testBounded = testBounded;
 exp.testUnbounded = testUnbounded;
+exp.test = test;
 
-exp.match = match;
 exp.matchBounded = matchBounded;
 exp.matchUnbounded = matchUnbounded;
+exp.match = match;
 
-exp.replace = replace;
 exp.replaceBounded = replaceBounded;
 exp.replaceUnbounded = replaceUnbounded;
+exp.replace = replace;
 
-exp.search = search;
 exp.searchBounded = searchBounded;
 exp.searchUnbounded = searchUnbounded;
+exp.search = search;
 
-exp.exec = exec;
 exp.execBounded = execBounded;
 exp.execUnbounded = execUnbounded;
+exp.exec = exec;
 
-exp.forEach = forEach;
 exp.forEachBounded = forEachBounded;
 exp.forEachUnbounded = forEachUnbounded;
+exp.forEach = forEach;
 
 
 }());
