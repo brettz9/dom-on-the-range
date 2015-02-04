@@ -102,7 +102,7 @@ function testBounded (regex, node) {
 
         return handleNode(node, {
             element: function (node) {
-                return Array.some(node.childNodes).reduce(findMatches);
+                return Array.from(node.childNodes).some(findMatches);
             },
             text: function (node) {
                 var contents = node.nodeValue;
