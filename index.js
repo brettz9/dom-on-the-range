@@ -22,7 +22,7 @@ function getSplitSafeRegex (regex) {
 
 
 /**
-* @param {Node} node The node out of which to extract
+* @param {Node} node The node out of which to split
 * @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
 * @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
 * @todo We could add an argument to allow splitting which adds the split nodes
@@ -34,14 +34,15 @@ function splitBounded (regex, node) {
     
     regex = getSplitSafeRegex(regex);
     
-    node = node.cloneNode(true);
-    
-    function extractInnerMatches (range, regex, node) {
-        function extractFoundMatches (arr, node) {
-            var found = extractInnerMatches(range, regex, node);
+    function cloneInnerMatches (range, regex, node) {
+        function cloneFoundMatches (arr, node) {
+            var found = cloneInnerMatches(range, regex, node);
             if (found && found.pre) {
                 arr = arr.concat(found.pre);
-                return extractFoundMatches(arr, found.post); // Keep splitting
+                if (!found.post) {
+                    return arr;
+                }
+                return cloneFoundMatches(arr, found.post); // Keep splitting
             }
             else if (found === undef) { // Ignore other nodes
                 return arr;
@@ -51,7 +52,7 @@ function splitBounded (regex, node) {
 
         return handleNode(node, {
             element: function (node) {
-                return Array.from(node.childNodes).reduce(extractFoundMatches, []);
+                return Array.from(node.childNodes).reduce(cloneFoundMatches, []);
             },
             text: function (node) {
                 var contents = node.nodeValue;
@@ -62,19 +63,18 @@ function splitBounded (regex, node) {
 
                 // Grab desired contents with known positions before discarding the split text
                 var matchEnd = matchStart + contents.match(regex)[0].length;
-                
-                range.setStart(node, matchStart);
-                range.setEnd(node, matchEnd);
-                var extra = range.extractContents(); // Discard matched regex split contents (e.g., a comma separator)
 
                 range.setStart(node, 0);
                 range.setEnd(node, matchStart);
-                var extracted = range.extractContents();
-                return {pre: extracted.childNodes[0], post: node};
+                var pre = range.cloneContents();
+                range.setStart(node, matchEnd);
+                range.setEnd(node, contents.length);
+                var post = range.cloneContents(); // Discard matched regex split contents (e.g., a comma separator)
+                return {pre: pre.childNodes[0], post: post.childNodes[0]};
             }
         });
     }
-    return extractInnerMatches(range, regex, node);
+    return cloneInnerMatches(range, regex, node);
 }
 
 function splitUnbounded (regex, node) {
@@ -117,6 +117,7 @@ function testBounded (regex, node) {
 }
 
 function testUnbounded (regex, node) {
+    regex = getRegex(regex);
     return handleNode(node, {
         element: function (node) {
             return regex.test(node.textContent);
@@ -128,7 +129,6 @@ function testUnbounded (regex, node) {
 }
 
 function test (regex, node, nodeBounded) {
-    regex = getRegex(regex);
     if (nodeBounded) {
         return testBounded(regex, node);
     }
@@ -136,15 +136,16 @@ function test (regex, node, nodeBounded) {
 }
 
 function matchBounded (regex, node) {
+    regex = getRegex(regex);
     
 }
 
 function matchUnbounded (regex, node) {
+    regex = getRegex(regex);
     
 }
 
 function match (regex, node, nodeBounded) {
-    regex = getRegex(regex);
     if (nodeBounded) {
         return matchBounded(regex, node);
     }
@@ -152,15 +153,16 @@ function match (regex, node, nodeBounded) {
 }
 
 function replaceBounded (regex, node, replacementNode) {
+    regex = getRegex(regex);
     
 }
 
 function replaceUnbounded (regex, node, replacementNode) {
+    regex = getRegex(regex);
     
 }
 
 function replace (regex, node, replacementNode) {
-    regex = getRegex(regex);
     if (regex.global) {
         
     }
@@ -171,10 +173,12 @@ function replace (regex, node, replacementNode) {
 }
 
 function searchBounded (regex, node) {
+    regex = getRegex(regex);
     
 }
 
 function searchUnbounded (regex, node) {
+    regex = getRegex(regex);
     return handleNode(node, {
         element: function (node) {
             return node.textContent.search(regex);
@@ -186,7 +190,6 @@ function searchUnbounded (regex, node) {
 }
 
 function search (regex, node, nodeBounded) {
-    regex = getRegex(regex);
     if (nodeBounded) {
         return searchBounded(regex, node);
     }
@@ -194,10 +197,12 @@ function search (regex, node, nodeBounded) {
 }
 
 function execBounded (regex, node) {
+    regex = getRegex(regex); // Todo: drop global as with split?
     
 }
 
 function execUnbounded (regex, node) {
+    regex = getRegex(regex); // Todo: drop global as with split?
     
 }
 
@@ -210,10 +215,12 @@ function exec (regex, node, nodeBounded) {
 }
 
 function forEachBounded (regex, node, cb) {
+    regex = getRegex(regex);
     
 }
 
 function forEachUnbounded (regex, node, cb) {
+    regex = getRegex(regex);
     
 }
 
