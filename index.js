@@ -25,6 +25,7 @@ function getSplitSafeRegex (regex) {
 * @param {Node} node The node out of which to extract
 * @param {RegExp|string} splitRegex Note that this regular expression is currently required to be continguous within a text node
 * @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the splitRegex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the splitRegex match (with the matching splitRegex's removed) and whose "post" property will be set to the remainder after the match.
+* @todo We could add an argument to allow splitting which adds the split nodes
 */
 function splitBounded (splitRegex, node) {
     var range = document.createRange();
