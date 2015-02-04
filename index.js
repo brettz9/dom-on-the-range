@@ -2,7 +2,7 @@
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
 
-if (exports) { // Todo: Implement Range with jsdom?
+if (exports) { // Todo: Implement pseudo-Range for jsdom or wait on https://github.com/tmpvar/jsdom/issues/317
     cloneRegex = require('regexp-clone');
     handleNode = require('handle-node');
     document = require('jsdom').jsdom('');
