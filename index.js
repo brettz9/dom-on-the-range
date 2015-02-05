@@ -28,24 +28,39 @@ function getSplitSafeRegex (regex) {
 * @todo We could add an argument to allow splitting which adds the split nodes
 * @todo Give option to add to fragment instead of array
 * @todo Give options to search within comments, etc.?
+* @example When the following is split by /test/ :
+* <a>here is a test that we wanted and <b>another test</b> that we wanted</a> and one more <i>test</i> too; but not this te<br/>st unless unbounded
+*
+* it should produce:
+*
+* <a>here is a </a>,
+* <a> that we wanted and <b>another </b></a>,
+* <a> that we wanted</a> and one more <i></i>,
+* <a> too; but not this te<br/>st</a> unless unbounded
+*
+* @todo Add option to remove elements rendered empty by stripped content (as in the above example with <i></i>)
 */
 function splitBounded (regex, node) {
     var range = document.createRange();
     
     regex = getSplitSafeRegex(regex);
-    
+
+    node = node.cloneNode(true);
+    // Todo: Deal with issue of getting split at beginning and end
     function cloneInnerMatches (range, regex, node) {
         function cloneFoundMatches (arr, node) {
             var found = cloneInnerMatches(range, regex, node);
-            if (found && found.pre) {
-                arr = arr.concat(found.pre);
+            if (found === undef) { // Ignore other node types like comments
+                return arr;
+            }
+            if (found && typeof found === 'object' && found.hasOwnProperty('pre')) {
+                if (found.pre) {
+                    arr = arr.concat(found.pre);
+                }
                 if (!found.post) {
                     return arr;
                 }
                 return cloneFoundMatches(arr, found.post); // Keep splitting
-            }
-            else if (found === undef) { // Ignore other nodes
-                return arr;
             }
             return arr.concat(found); // Add remainder text or add descendant element nodes (note that regex match does not span nodes)
         }
@@ -64,13 +79,15 @@ function splitBounded (regex, node) {
                 // Grab desired contents with known positions before discarding the split text
                 var matchEnd = matchStart + contents.match(regex)[0].length;
 
+                range.setStart(node, matchStart);
+                range.setEnd(node, matchEnd);
+                var extra = range.extractContents(); // Discard matched regex split contents (e.g., a comma separator)
+
                 range.setStart(node, 0);
                 range.setEnd(node, matchStart);
-                var pre = range.cloneContents();
-                range.setStart(node, matchEnd);
-                range.setEnd(node, contents.length);
-                var post = range.cloneContents(); // Discard matched regex split contents (e.g., a comma separator)
-                return {pre: pre.childNodes[0], post: post.childNodes[0]};
+
+                var pre = range.extractContents();
+                return {pre: pre.childNodes[0], post: node.childNodes[0]};
             }
         });
     }
@@ -135,6 +152,7 @@ function test (regex, node, nodeBounded) {
     return testUnbounded(regex, node);
 }
 
+// Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too)
 function matchBounded (regex, node) {
     regex = getRegex(regex);
     
@@ -154,14 +172,21 @@ function match (regex, node, nodeBounded) {
 
 function replaceBounded (regex, node, replacementNode) {
     regex = getRegex(regex);
+    replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
     
 }
 
 function replaceUnbounded (regex, node, replacementNode) {
     regex = getRegex(regex);
+    replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
     
 }
 
+/**
+* @param {RegExp|string} regex A regular expression (as string or RegExp)
+* @param {Node|string} node A DOM Node in which to seek text to replace
+* @param {Node|string} replacementNode A DOM Node or a string
+*/
 function replace (regex, node, replacementNode) {
     if (regex.global) {
         
