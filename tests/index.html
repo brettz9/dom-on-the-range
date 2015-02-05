@@ -6,16 +6,19 @@
     <script src="../node_modules/regexp-clone/index.js"></script>
     <script src="../node_modules/handle-node/index.js"></script>
     <script src="../index.js"></script>
+    <script>
+window.addEventListener('DOMContentLoaded', function () {
+
+alert( // document.body.appendChild(
+    DOTR.splitBounded(/te.t/, document.body).map(function (node) {return node.nodeValue || node.textContent;})
+);
+
+});
+</script>
 </head>
 <body>
 
-<p>This is a test <b>and another test</b> and another <i>test</i>.</p>
-
-<script>
-alert( // document.body.appendChild(
-    DOTR.splitBounded(/te.t/, document.body).map(function (node) {return node.nodeValue;})
-);
-</script>
+<p>This is a test <b>and another test</b> and yet another <i>test</i>.</p>
 
 </body>
 </html>
