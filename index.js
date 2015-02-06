@@ -269,6 +269,8 @@ function searchBounded (regex, node, opts) {
 
 /**
 * This differs from its corresponding String.prototype.search in that a global search will return an array of indexes
+* @param {Node} node The node in which to search
+* @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 */
 function searchUnbounded (regex, node) {
     regex = getRegex(regex);
@@ -288,9 +290,9 @@ function searchUnbounded (regex, node) {
     });
 }
 
-function search (regex, node, nodeBounded) {
+function search (regex, node, opts, nodeBounded) {
     if (nodeBounded) {
-        return searchBounded(regex, node);
+        return searchBounded(regex, node, opts);
     }
     return searchUnbounded(regex, node);
 }
