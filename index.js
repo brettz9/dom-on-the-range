@@ -17,6 +17,10 @@ function getSplitSafeRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex, {global: false});
 }
 
+function getNode (node) {
+    return typeof node === 'string' ? document.createTextNode(node) : node;
+}
+
 function textStringify (items) {
     if (Array.isArray(items)) {
         return items.map(function (node) {
@@ -259,7 +263,6 @@ function test (regex, node, nodeBounded) {
 * @param {Node} node The node in which to search
 * @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 * @param {object} [opts] Options object
-* @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
 * @returns {number|array} If regex is global, an array of positions will be found or an empty array if not found. If regex is not global, the index of the first match will be returned (or -1 if none is found)
 */
 function searchBounded (regex, node, opts) {
@@ -365,7 +368,7 @@ function search (regex, node, opts, nodeBounded) {
 
 function execBounded (regex, node) {
     regex = getRegex(regex); // Todo: drop global as with split?
-    
+    // flatten?
 }
 
 function execUnbounded (regex, node) {
@@ -393,10 +396,7 @@ function exec (regex, node, nodeBounded) {
 function matchBounded (regex, node, opts) {
     regex = getRegex(regex);
     opts = opts || {};
-    if (!opts.hasOwnProperty('flatten')) {
-        opts.flatten = true;
-    }
-    var flatten = opts.flatten;
+    var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
 
     if (!regex.global) {
         return execBounded(regex, node, opts);
@@ -452,17 +452,56 @@ function match (regex, node, opts, nodeBounded) {
 }
 
 function replaceBounded (regex, node, opts, replacementNode) {
+    var range = document.createRange();
     regex = getRegex(regex);
-    replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
-    if (regex.global) {
-        
+    replacementNode = getNode(replacementNode);
+    opts = opts || {};
+    if (!opts.replaceNode) {
+        node = node.cloneNode(true);
     }
-    
+
+    function findInnerMatches (regex, node) {
+        function findMatches (node) {
+            return findInnerMatches(regex, node);
+        }
+
+        return handleNode(node, {
+            element: function (node) {
+                return Array.from(node.childNodes).some(findMatches);
+            },
+            document: function (node) {
+                return this.element(node);
+            },
+            documentFragment: function (node) {
+                return this.element(node);
+            },
+            cdata: function (node) {
+                return this.text(node);
+            },
+            text: function (node) {
+                var contents = node.nodeValue;
+                var found = regex.test(contents);
+                
+                /*
+                Todo: Implement, also enabling option to surround contents, borrowing from https://github.com/padolsey/findAndReplaceDOMText
+                range.setStart(node, matchStart);
+                range.setEnd(node, matchEnd);
+                range.deleteContents();
+                contents.replace(regex, replacementNode);
+                */
+
+                if (found && !regex.global) {
+                    return true;
+                }
+            }
+        });
+    }
+    return node;
 }
 
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
-    replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
+    replacementNode = getNode(replacementNode);
     if (regex.global) {
         
     }
