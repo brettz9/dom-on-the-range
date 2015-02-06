@@ -10,11 +10,7 @@
 window.addEventListener('DOMContentLoaded', function () {
 
 alert( // document.body.appendChild(
-    DOTR.splitBounded(/te.t/, document.body).map(function (node) {
-        var div = document.createElement('div');
-        div.appendChild(node.cloneNode(true));
-        return div.innerHTML;
-    })
+    DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'})
 );
 
 });

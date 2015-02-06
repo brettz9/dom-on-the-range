@@ -17,6 +17,50 @@ function getSplitSafeRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex, {global: false});
 }
 
+function textStringify (items) {
+    if (Array.isArray(items)) {
+        return items.map(function (node) {
+            return textStringify(node);
+        });
+    }
+    if (items && typeof items === 'object') {
+        switch (items.nodeType) {
+            case 1:
+                return items.textContent;
+            case 3:
+                return items.nodeValue;
+            case 11:
+                var div = document.createElement('div');
+                div.appendChild(items.cloneNode(true));
+                return div.textContent;
+            default:
+                throw 'Unexpected node type';
+        }
+    }
+}
+
+function htmlStringify (items) {
+    if (Array.isArray(items)) {
+        return items.map(function (node) {
+            return htmlStringify(node);
+        });
+    }
+    if (items && typeof items === 'object') {
+        switch (items.nodeType) {
+            case 1:
+                return items.outerHTML;
+            case 3:
+                return items.nodeValue;
+            case 11:
+                var div = document.createElement('div');
+                div.appendChild(items.cloneNode(true));
+                return div.innerHTML;
+            default:
+                throw 'Unexpected node type';
+        }
+    }
+}
+
 
 // Todo all of the below (node-bounded and node-unbounded versions)!
 
@@ -24,7 +68,9 @@ function getSplitSafeRegex (regex) {
 /**
 * @param {Node} node The node out of which to split
 * @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
-* @returns {function} Returns a function which accepts an XML or HTML node as an argument. This function returns a value as follows. If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
+* @param {object} [opts] Options include: "returnType": "html" to convert text nodes or fragments into HTML strings, "text" for strings, and "dom" for the default
+* @returns {Text|Array}
+* @todo: Fix this description for returns to be accurate! If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
 * @todo We could add an argument to allow splitting which adds the split nodes
 * @todo Give option to add to fragment instead of array
 * @todo Give options to search within comments, etc.?
@@ -40,7 +86,7 @@ function getSplitSafeRegex (regex) {
 *
 * @todo Add option to remove elements rendered empty by stripped content (as in the above example with <i></i>)
 */
-function splitBounded (regex, node) {
+function splitBounded (regex, node, opts) {
     var range = document.createRange();
     
     regex = getSplitSafeRegex(regex);
@@ -54,14 +100,13 @@ function splitBounded (regex, node) {
             if (!found) { // Ignore other node types like comments and ignore false text matches (those nodes will be included later)
                 return arr;
             }
-            if (Array.isArray(found)) {
+            if (!found.text) {
                 return arr.concat(found); // Add descendant element node matches (note that regex match does not span nodes)
             }
-
-            if (found.pre) {
-                arr = arr.concat(found.pre);
+            if (found[0]) {
+                arr = arr.concat(found[0]);
             }
-            return found.post ? cloneFoundMatches(arr, found.post) : arr; // Keep splitting if post present
+            return found[1] ? cloneFoundMatches(arr, found[1]) : arr; // Keep splitting if post present
         }
 
         return handleNode(node, {
@@ -86,11 +131,24 @@ function splitBounded (regex, node) {
                 range.setEnd(node, matchStart);
 
                 var pre = range.extractContents();
-                return {pre: pre, post: node};
+                var r = [pre, node];
+                r.text = true;
+                return r;
             }
         });
     }
-    return cloneInnerMatches(range, regex, node);
+    var ret = cloneInnerMatches(range, regex, node);
+    if (opts && opts.returnType) {
+        switch (opts.returnType) {
+            case 'html':
+                return htmlStringify(ret);
+            case 'text':
+                return textStringify(ret);
+            case 'dom':
+                return ret;
+        }
+    }
+    return ret;
 }
 
 function splitUnbounded (regex, node) {
@@ -268,6 +326,9 @@ if (exports === undef) {
 else {
     exp = exports;
 }
+
+exp.textStringify = textStringify;
+exp.htmlStringify = htmlStringify;
 
 // Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
 
