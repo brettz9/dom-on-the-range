@@ -152,7 +152,7 @@ function splitBounded (regex, node, opts) {
     return ret;
 }
 
-function splitUnbounded (regex, node) {
+function splitUnbounded (regex, node, opts) {
     var range = document.createRange();
     
     regex = getSplitSafeRegex(regex);
@@ -160,11 +160,11 @@ function splitUnbounded (regex, node) {
     // Todo
 }
 
-function split (regex, node, nodeBounded) {
+function split (regex, node, opts, nodeBounded) {
     if (nodeBounded) {
-        return splitBounded(regex, node);
+        return splitBounded(regex, node, opts);
     }
-    return splitUnbounded(regex, node);
+    return splitUnbounded(regex, node, opts);
 }
 
 // todo: For handleNode, add support for comment, etc., as needed on all methods
@@ -259,39 +259,43 @@ function matchBounded (regex, node, opts) {
     return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
 }
 
-function matchUnbounded (regex, node) {
+function matchUnbounded (regex, node, opts) {
     regex = getRegex(regex);
     
 }
 
-function match (regex, node, nodeBounded) {
+function match (regex, node, opts, nodeBounded) {
     if (nodeBounded) {
-        return matchBounded(regex, node);
+        return matchBounded(regex, node, opts);
     }
-    return matchUnbounded(regex, node);
+    return matchUnbounded(regex, node, opts);
 }
 
-function replaceBounded (regex, node, replacementNode) {
+function replaceBounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
     replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
+    if (regex.global) {
+        
+    }
     
 }
 
-function replaceUnbounded (regex, node, replacementNode) {
+function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
     replacementNode = typeof replacementNode === 'string' ? document.createTextNode(replacementNode) : replacementNode;
+    if (regex.global) {
+        
+    }
     
 }
 
 /**
 * @param {RegExp|string} regex A regular expression (as string or RegExp)
 * @param {Node|string} node A DOM Node in which to seek text to replace
+* @param {object} [opts] Options object
 * @param {Node|string} replacementNode A DOM Node or a string
 */
-function replace (regex, node, replacementNode) {
-    if (regex.global) {
-        
-    }
+function replace (regex, node, opts, replacementNode) {
     if (nodeBounded) {
         return replaceBounded(regex, node, replacementNode);
     }
