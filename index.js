@@ -1,4 +1,4 @@
-/*jslint vars:true, node:true*/
+/*jslint vars:true, node:true, todo:true*/
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
 
@@ -131,6 +131,15 @@ function splitBounded (regex, node, opts) {
             element: function (node) {
                 return Array.from(node.childNodes).reduce(cloneFoundMatches, []);
             },
+            document: function (node) {
+                return this.element(node);
+            },
+            documentFragment: function (node) {
+                return this.element(node);
+            },
+            cdata: function (node) {
+                return this.text(node);
+            },
             text: function (node) {
                 var contents = node.nodeValue;
                 var matchStart = contents.search(regex);
@@ -199,6 +208,15 @@ function testBounded (regex, node) {
             element: function (node) {
                 return Array.from(node.childNodes).some(findMatches);
             },
+            document: function (node) {
+                return this.element(node);
+            },
+            documentFragment: function (node) {
+                return this.element(node);
+            },
+            cdata: function (node) {
+                return this.text(node);
+            },
             text: function (node) {
                 var contents = node.nodeValue;
                 return regex.test(contents);
@@ -213,6 +231,15 @@ function testUnbounded (regex, node) {
     return handleNode(node, {
         element: function (node) {
             return regex.test(node.textContent);
+        },
+        document: function (node) {
+            return this.element(node);
+        },
+        documentFragment: function (node) {
+            return this.element(node);
+        },
+        cdata: function (node) {
+            return this.text(node);
         },
         text: function (node) {
             return regex.test(node.nodeValue);
@@ -250,6 +277,15 @@ function searchBounded (regex, node, opts) {
                 element: function (node) {
                     return Array.from(node.childNodes).reduce(findMatches, []);
                 },
+                document: function (node) {
+                    return this.element(node);
+                },
+                documentFragment: function (node) {
+                    return this.element(node);
+                },
+                cdata: function (node) {
+                    return this.text(node);
+                },
                 text: function (node) {
                     var contents = node.nodeValue;
                     return searchPositions(contents, regex);
@@ -267,6 +303,15 @@ function searchBounded (regex, node, opts) {
             return handleNode(node, {
                 element: function (node) {
                     return Array.from(node.childNodes).reduce(findMatch, -1);
+                },
+                document: function (node) {
+                    return this.element(node);
+                },
+                documentFragment: function (node) {
+                    return this.element(node);
+                },
+                cdata: function (node) {
+                    return this.text(node);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
@@ -291,6 +336,15 @@ function searchUnbounded (regex, node) {
                 return searchPositions(node.textContent, regex);
             }
             return node.textContent.search(regex);
+        },
+        document: function (node) {
+            return this.element(node);
+        },
+        documentFragment: function (node) {
+            return this.element(node);
+        },
+        cdata: function (node) {
+            return this.text(node);
         },
         text: function (node) {
             if (regex.global) {
@@ -365,6 +419,15 @@ function matchBounded (regex, node, opts) {
         return handleNode(node, {
             element: function (node) {
                 return Array.from(node.childNodes).reduce(findMatches, []);
+            },
+            document: function (node) {
+                return this.element(node);
+            },
+            documentFragment: function (node) {
+                return this.element(node);
+            },
+            cdata: function (node) {
+                return this.text(node);
             },
             text: function (node) {
                 var contents = node.nodeValue;
