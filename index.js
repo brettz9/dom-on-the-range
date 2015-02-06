@@ -68,7 +68,8 @@ function htmlStringify (items) {
 /**
 * @param {Node} node The node out of which to split
 * @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
-* @param {object} [opts] Options include: "returnType": "html" to convert text nodes or fragments into HTML strings, "text" for strings, and "dom" for the default
+* @param {object} [opts] Options object
+* @param {"html"|"text"|"dom"} [opts.returnType=dom] Set to "html" to convert text nodes or fragments into HTML strings, "text" for strings, and "dom" for the default
 * @returns {Text|Array}
 * @todo: Fix this description for returns to be accurate! If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
 * @todo We could add an argument to allow splitting which adds the split nodes
@@ -170,7 +171,7 @@ function split (regex, node, nodeBounded) {
 
 function testBounded (regex, node) {
     regex = getRegex(regex);
-    node = node.cloneNode(true);
+    // node = node.cloneNode(true); // Use this if altering node
     
     function findInnerMatches (regex, node) {
         function findMatches (node) {
@@ -210,9 +211,52 @@ function test (regex, node, nodeBounded) {
 }
 
 // Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too); also give option to grab parent element with or without other text contents
-function matchBounded (regex, node) {
+/**
+* If the supplied regular expression is not global, the results will be as with execBounded().
+* @param {Node} node The node out of which to split
+* @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
+* @param {object} [opts] Options object
+* @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
+* @returns {array} An array or array of arrays (depending on the flatten value) containing the matches.
+*/
+function matchBounded (regex, node, opts) {
     regex = getRegex(regex);
+    opts = opts || {};
+    if (!opts.hasOwnProperty('flatten')) {
+        opts.flatten = true;
+    }
+    var flatten = opts.flatten;
+
+    if (!regex.global) {
+        return execBounded(regex, node, opts);
+    }
     
+    function findInnerMatches (regex, node) {
+        function findMatches (arr, node) {
+            var found = findInnerMatches(regex, node);
+            if (found) { // Ignore comment nodes
+                if (flatten) {
+                    arr = arr.concat(found);
+                }
+                else {
+                    arr.push(found);
+                }
+            }
+            return arr;
+        }
+
+        return handleNode(node, {
+            element: function (node) {
+                return Array.from(node.childNodes).reduce(findMatches, []);
+            },
+            text: function (node) {
+                var contents = node.nodeValue;
+                return contents.match(regex);
+            }
+        });
+    }
+    var innerMatches = findInnerMatches(regex, node);
+    return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
 }
 
 function matchUnbounded (regex, node) {
