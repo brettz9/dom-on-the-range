@@ -210,6 +210,93 @@ function test (regex, node, nodeBounded) {
     return testUnbounded(regex, node);
 }
 
+
+function searchBounded (regex, node) {
+    regex = getRegex(regex);
+    // node = node.cloneNode(true); // Use this if altering node
+    
+    function findInnerMatches (regex, node) {
+        function findMatches (node) {
+            return findInnerMatches(regex, node);
+        }
+
+        return handleNode(node, {
+            element: function (node) {
+                return Array.from(node.childNodes).some(findMatches);
+            },
+            text: function (node) {
+                var contents = node.nodeValue;
+                return contents.search(regex);
+            }
+        });
+    }
+    return findInnerMatches(regex, node);
+}
+
+/**
+* This differs from its corresponding String.prototype.search in that a global search will return an array of indexes
+*/
+function searchUnbounded (regex, node) {
+    regex = getRegex(regex);
+    function search (str) {
+        var ret = [];
+        var offset = 0;
+        var found, len, inc;
+        while (true) {
+            found = str.search(regex);
+            if (found === -1) {
+                break;
+            }
+            len = str.match(regex)[0].length;
+            ret.push(offset + found);
+            inc = found + len;
+            offset += inc;
+            str = str.slice(inc);
+        }
+        return ret;
+    }
+    return handleNode(node, {
+        element: function (node) {
+            if (regex.global) {
+                return search(node.textContent);
+            }
+            return node.textContent.search(regex);
+        },
+        text: function (node) {
+            if (regex.global) {
+                return search(node.nodeValue);
+            }
+            return node.nodeValue.search(regex);
+        }
+    });
+}
+
+function search (regex, node, nodeBounded) {
+    if (nodeBounded) {
+        return searchBounded(regex, node);
+    }
+    return searchUnbounded(regex, node);
+}
+
+
+function execBounded (regex, node) {
+    regex = getRegex(regex); // Todo: drop global as with split?
+    
+}
+
+function execUnbounded (regex, node) {
+    regex = getRegex(regex); // Todo: drop global as with split?
+    
+}
+
+function exec (regex, node, nodeBounded) {
+    regex = getRegex(regex);
+    if (nodeBounded) {
+        return searchBounded(regex, node);
+    }
+    return searchUnbounded(regex, node);
+}
+
 // Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too); also give option to grab parent element with or without other text contents
 /**
 * If the supplied regular expression is not global, the results will be as with execBounded().
@@ -292,56 +379,15 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
 /**
 * @param {RegExp|string} regex A regular expression (as string or RegExp)
 * @param {Node|string} node A DOM Node in which to seek text to replace
-* @param {object} [opts] Options object
 * @param {Node|string} replacementNode A DOM Node or a string
+* @param {object} [opts] Options object
+* @param {boolean} nodeBounded
 */
-function replace (regex, node, opts, replacementNode) {
+function replace (regex, node, replacementNode, opts, nodeBounded) {
     if (nodeBounded) {
         return replaceBounded(regex, node, replacementNode);
     }
     return replaceUnbounded(regex, node, replacementNode);
-}
-
-function searchBounded (regex, node) {
-    regex = getRegex(regex);
-    
-}
-
-function searchUnbounded (regex, node) {
-    regex = getRegex(regex);
-    return handleNode(node, {
-        element: function (node) {
-            return node.textContent.search(regex);
-        },
-        text: function (node) {
-            return node.nodeValue.search(regex);
-        }
-    });
-}
-
-function search (regex, node, nodeBounded) {
-    if (nodeBounded) {
-        return searchBounded(regex, node);
-    }
-    return searchUnbounded(regex, node);
-}
-
-function execBounded (regex, node) {
-    regex = getRegex(regex); // Todo: drop global as with split?
-    
-}
-
-function execUnbounded (regex, node) {
-    regex = getRegex(regex); // Todo: drop global as with split?
-    
-}
-
-function exec (regex, node, nodeBounded) {
-    regex = getRegex(regex);
-    if (nodeBounded) {
-        return searchBounded(regex, node);
-    }
-    return searchUnbounded(regex, node);
 }
 
 function forEachBounded (regex, node, cb) {
@@ -388,14 +434,6 @@ exp.testBounded = testBounded;
 exp.testUnbounded = testUnbounded;
 exp.test = test;
 
-exp.matchBounded = matchBounded;
-exp.matchUnbounded = matchUnbounded;
-exp.match = match;
-
-exp.replaceBounded = replaceBounded;
-exp.replaceUnbounded = replaceUnbounded;
-exp.replace = replace;
-
 exp.searchBounded = searchBounded;
 exp.searchUnbounded = searchUnbounded;
 exp.search = search;
@@ -403,6 +441,14 @@ exp.search = search;
 exp.execBounded = execBounded;
 exp.execUnbounded = execUnbounded;
 exp.exec = exec;
+
+exp.matchBounded = matchBounded;
+exp.matchUnbounded = matchUnbounded;
+exp.match = match;
+
+exp.replaceBounded = replaceBounded;
+exp.replaceUnbounded = replaceUnbounded;
+exp.replace = replace;
 
 exp.forEachBounded = forEachBounded;
 exp.forEachUnbounded = forEachUnbounded;
