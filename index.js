@@ -46,23 +46,22 @@ function splitBounded (regex, node) {
     regex = getSplitSafeRegex(regex);
 
     node = node.cloneNode(true);
+    var startNode = node;
     // Todo: Deal with issue of getting split at beginning and end
     function cloneInnerMatches (range, regex, node) {
         function cloneFoundMatches (arr, node) {
             var found = cloneInnerMatches(range, regex, node);
-            if (found === undef) { // Ignore other node types like comments
+            if (!found) { // Ignore other node types like comments and ignore false text matches (those nodes will be included later)
                 return arr;
             }
-            if (found && typeof found === 'object' && found.hasOwnProperty('pre')) {
-                if (found.pre) {
-                    arr = arr.concat(found.pre);
-                }
-                if (!found.post) {
-                    return arr;
-                }
-                return cloneFoundMatches(arr, found.post); // Keep splitting
+            if (Array.isArray(found)) {
+                return arr.concat(found); // Add descendant element node matches (note that regex match does not span nodes)
             }
-            return arr.concat(found); // Add remainder text or add descendant element nodes (note that regex match does not span nodes)
+
+            if (found.pre) {
+                arr = arr.concat(found.pre);
+            }
+            return found.post ? cloneFoundMatches(arr, found.post) : arr; // Keep splitting if post present
         }
 
         return handleNode(node, {
@@ -73,7 +72,7 @@ function splitBounded (regex, node) {
                 var contents = node.nodeValue;
                 var matchStart = contents.search(regex);
                 if (matchStart === -1) {
-                    return node;
+                    return false;
                 }
 
                 // Grab desired contents with known positions before discarding the split text
@@ -81,13 +80,13 @@ function splitBounded (regex, node) {
 
                 range.setStart(node, matchStart);
                 range.setEnd(node, matchEnd);
-                var extra = range.extractContents(); // Discard matched regex split contents (e.g., a comma separator)
+                range.deleteContents(); // Discard matched regex split contents (e.g., a comma separator)
 
-                range.setStart(node, 0);
+                range.setStart(startNode, 0);
                 range.setEnd(node, matchStart);
 
                 var pre = range.extractContents();
-                return {pre: pre.childNodes[0], post: node.childNodes[0]};
+                return {pre: pre, post: node};
             }
         });
     }
