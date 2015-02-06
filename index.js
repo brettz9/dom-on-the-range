@@ -233,6 +233,7 @@ function test (regex, node, nodeBounded) {
 * @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
+* @returns {number|array} If regex is global, an array of positions will be found or an empty array if not found. If regex is not global, the index of the first match will be returned (or -1 if none is found)
 */
 function searchBounded (regex, node, opts) {
     regex = getRegex(regex);
@@ -242,10 +243,7 @@ function searchBounded (regex, node, opts) {
         function (regex, node) {
             function findMatches (arr, node) {
                 var found = findInnerMatches(regex, node);
-                
-                searchPositions(str, regex)
-    // Todo: Fix
-                
+                arr = arr.concat(found);
                 return arr;
             }
             return handleNode(node, {
@@ -283,6 +281,7 @@ function searchBounded (regex, node, opts) {
 * This differs from its corresponding String.prototype.search in that a global search will return an array of indexes
 * @param {Node} node The node in which to search
 * @param {RegExp|string} regex This regular expression is required to be continguous within a text node
+* @returns {number|array} If regex is global, an array of positions will be found or an empty array if not found. If regex is not global, the index of the first match will be returned (or -1 if none is found)
 */
 function searchUnbounded (regex, node) {
     regex = getRegex(regex);
