@@ -385,9 +385,9 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
 */
 function replace (regex, node, replacementNode, opts, nodeBounded) {
     if (nodeBounded) {
-        return replaceBounded(regex, node, replacementNode);
+        return replaceBounded(regex, node, replacementNode, opts);
     }
-    return replaceUnbounded(regex, node, replacementNode);
+    return replaceUnbounded(regex, node, replacementNode, opts);
 }
 
 function forEachBounded (regex, node, cb) {
