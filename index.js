@@ -238,32 +238,44 @@ function searchBounded (regex, node, opts) {
     regex = getRegex(regex);
     // node = node.cloneNode(true); // Use this if altering node
     
-    function findInnerMatches (regex, node) {
-        function findMatches (arr, node) {
-            var found = findInnerMatches(regex, node);
-            
-            searchPositions(str, regex)
-// Todo: Fix
-            
-            return arr;
-        }
-
-        return handleNode(node, {
-            element: function (node) {
-                if (regex.global) {
-                    
-                }
-                return Array.from(node.childNodes).reduce(findMatches, []);
-            },
-            text: function (node) {
-                var contents = node.nodeValue;
-                if (regex.global) {
+    var findInnerMatches = regex.global ?
+        function (regex, node) {
+            function findMatches (arr, node) {
+                var found = findInnerMatches(regex, node);
+                
+                searchPositions(str, regex)
+    // Todo: Fix
+                
+                return arr;
+            }
+            return handleNode(node, {
+                element: function (node) {
+                    return Array.from(node.childNodes).reduce(findMatches, []);
+                },
+                text: function (node) {
+                    var contents = node.nodeValue;
                     return searchPositions(contents, regex);
                 }
-                return contents.search(regex);
+            });
+        } :
+        function (regex, node) {
+            function findMatch (idx, node) {
+                if (idx !== -1) {
+                    return idx;
+                }
+                return findInnerMatches(regex, node);
             }
-        });
-    }
+
+            return handleNode(node, {
+                element: function (node) {
+                    return Array.from(node.childNodes).reduce(findMatch, -1);
+                },
+                text: function (node) {
+                    var contents = node.nodeValue;
+                    return contents.search(regex);
+                }
+            });
+        };
     return findInnerMatches(regex, node);
 }
 
