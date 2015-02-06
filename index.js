@@ -61,6 +61,23 @@ function htmlStringify (items) {
     }
 }
 
+function searchPositions (str, regex) {
+    var ret = [];
+    var offset = 0;
+    var found, len, inc;
+    while (true) {
+        found = str.search(regex);
+        if (found === -1) {
+            break;
+        }
+        len = str.match(regex)[0].length;
+        ret.push(offset + found);
+        inc = found + len;
+        offset += inc;
+        str = str.slice(inc);
+    }
+    return ret;
+}
 
 // Todo all of the below (node-bounded and node-unbounded versions)!
 
@@ -238,33 +255,16 @@ function searchBounded (regex, node) {
 */
 function searchUnbounded (regex, node) {
     regex = getRegex(regex);
-    function search (str) {
-        var ret = [];
-        var offset = 0;
-        var found, len, inc;
-        while (true) {
-            found = str.search(regex);
-            if (found === -1) {
-                break;
-            }
-            len = str.match(regex)[0].length;
-            ret.push(offset + found);
-            inc = found + len;
-            offset += inc;
-            str = str.slice(inc);
-        }
-        return ret;
-    }
     return handleNode(node, {
         element: function (node) {
             if (regex.global) {
-                return search(node.textContent);
+                return searchPositions(node.textContent, regex);
             }
             return node.textContent.search(regex);
         },
         text: function (node) {
             if (regex.global) {
-                return search(node.nodeValue);
+                return searchPositions(node.nodeValue, regex);
             }
             return node.nodeValue.search(regex);
         }
@@ -421,11 +421,13 @@ else {
     exp = exports;
 }
 
+// UTILITY EXPORTS
 exp.textStringify = textStringify;
 exp.htmlStringify = htmlStringify;
+exp.searchPositions = searchPositions;
 
+// MAIN API EXPORTS
 // Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
-
 exp.splitUnbounded = splitUnbounded;
 exp.splitBounded = splitBounded;
 exp.split = split;
