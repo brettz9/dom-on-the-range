@@ -84,7 +84,7 @@ function searchPositions (str, regex) {
 
 /**
 * @param {Node} node The node out of which to split
-* @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
+* @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 * @param {object} [opts] Options object
 * @param {"html"|"text"|"dom"} [opts.returnType=dom] Set to "html" to convert text nodes or fragments into HTML strings, "text" for strings, and "dom" for the default
 * @returns {Text|Array}
@@ -227,22 +227,39 @@ function test (regex, node, nodeBounded) {
     return testUnbounded(regex, node);
 }
 
-
-function searchBounded (regex, node) {
+/**
+*
+* @param {Node} node The node in which to search
+* @param {RegExp|string} regex This regular expression is required to be continguous within a text node
+* @param {object} [opts] Options object
+* @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
+*/
+function searchBounded (regex, node, opts) {
     regex = getRegex(regex);
     // node = node.cloneNode(true); // Use this if altering node
     
     function findInnerMatches (regex, node) {
-        function findMatches (node) {
-            return findInnerMatches(regex, node);
+        function findMatches (arr, node) {
+            var found = findInnerMatches(regex, node);
+            
+            searchPositions(str, regex)
+// Todo: Fix
+            
+            return arr;
         }
 
         return handleNode(node, {
             element: function (node) {
-                return Array.from(node.childNodes).some(findMatches);
+                if (regex.global) {
+                    
+                }
+                return Array.from(node.childNodes).reduce(findMatches, []);
             },
             text: function (node) {
                 var contents = node.nodeValue;
+                if (regex.global) {
+                    return searchPositions(contents, regex);
+                }
                 return contents.search(regex);
             }
         });
@@ -301,7 +318,7 @@ function exec (regex, node, nodeBounded) {
 /**
 * If the supplied regular expression is not global, the results will be as with execBounded().
 * @param {Node} node The node out of which to split
-* @param {RegExp|string} regex Note that this regular expression is currently required to be continguous within a text node
+* @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
 * @returns {array} An array or array of arrays (depending on the flatten value) containing the matches.
