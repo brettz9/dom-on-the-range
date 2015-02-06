@@ -152,7 +152,7 @@ function test (regex, node, nodeBounded) {
     return testUnbounded(regex, node);
 }
 
-// Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too)
+// Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too); also give option to grab parent element with or without other text contents
 function matchBounded (regex, node) {
     regex = getRegex(regex);
     
