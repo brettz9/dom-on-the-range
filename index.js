@@ -358,20 +358,64 @@ function searchUnbounded (regex, node) {
     });
 }
 
-function search (regex, node, opts, nodeBounded) {
+function search (regex, node, nodeBounded) {
     if (nodeBounded) {
-        return searchBounded(regex, node, opts);
+        return searchBounded(regex, node);
     }
     return searchUnbounded(regex, node);
 }
 
-
-function execBounded (regex, node) {
+/**
+*
+*/
+function execBounded (regex, node, opts) {
     regex = getRegex(regex); // Todo: drop global as with split?
     // flatten?
+    opts = opts || {};
+    var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
+
+    if (!regex.global) {
+        return execBounded(regex, node, opts);
+    }
+    
+    function findInnerMatches (regex, node) {
+        function findMatches (arr, node) {
+            var found = findInnerMatches(regex, node);
+            if (found) { // Ignore comment nodes
+                if (flatten) {
+                    arr = arr.concat(found);
+                }
+                else {
+                    arr.push(found);
+                }
+            }
+            return arr;
+        }
+
+        return handleNode(node, {
+            element: function (node) {
+                return Array.from(node.childNodes).reduce(findMatches, []);
+            },
+            document: function (node) {
+                return this.element(node);
+            },
+            documentFragment: function (node) {
+                return this.element(node);
+            },
+            cdata: function (node) {
+                return this.text(node);
+            },
+            text: function (node) {
+                var contents = node.nodeValue;
+                return contents.match(regex);
+            }
+        });
+    }
+    var innerMatches = findInnerMatches(regex, node);
+    return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
 }
 
-function execUnbounded (regex, node) {
+function execUnbounded (regex, node, opts) {
     regex = getRegex(regex); // Todo: drop global as with split?
     
 }
@@ -379,9 +423,9 @@ function execUnbounded (regex, node) {
 function exec (regex, node, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return searchBounded(regex, node);
+        return execBounded(regex, node, opts);
     }
-    return searchUnbounded(regex, node);
+    return execUnbounded(regex, node, opts);
 }
 
 // Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too); also give option to grab parent element with or without other text contents
