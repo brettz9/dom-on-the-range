@@ -372,6 +372,7 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var retArr;
+                    // Todo: Fix
                     while ((retArr = regex.exec(contents)) !== null) {
                         if (retArr) {
                             retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
