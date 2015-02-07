@@ -369,12 +369,12 @@ function search (regex, node, nodeBounded) {
 * @todo Finish creating default option to treat as with RegExp.prototype.exec and only return one at a time; need to deal with lastIndex
 */
 function execBounded (regex, node, opts) {
-    if (regex && typeof regex === 'object' && !regex.global) { // If one doesn't wish a copy, require global as with RegExp.prototype.exec
-        regex = getRegex(regex); // Todo: drop global as with split?
-    }
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
+    if (all || (regex && typeof regex === 'object' && !regex.global)) { // Modify supplied RegExp (its lastIndex) if not returning all and is global (as with RegExp.prototype.exec behavior)
+        regex = getRegex(regex); // Todo: drop global as with split?
+    }
     var ret = null;
     if (flatten && all) {
         ret = [];
