@@ -366,11 +366,10 @@ function search (regex, node, nodeBounded) {
 }
 
 /**
-*
+* @todo Consider whether to treat as with RegExp.prototype.exec and only return one at a time (or option to do this)
 */
 function execBounded (regex, node, opts) {
     regex = getRegex(regex); // Todo: drop global as with split?
-    // flatten?
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var ret = null;
@@ -378,10 +377,6 @@ function execBounded (regex, node, opts) {
         ret = [];
     }
 
-    if (!regex.global) {
-        return execBounded(regex, node, opts);
-    }
-    
     function findInnerMatches (regex, node) {
         function findMatches (arr, node) {
             var found = findInnerMatches(regex, node);
@@ -418,7 +413,7 @@ function execBounded (regex, node, opts) {
             },
             text: function (node) {
                 var contents = node.nodeValue;
-                regex.lastIndex = 0;
+                regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                 return regex.exec(contents);
             }
         });
@@ -581,22 +576,29 @@ function replace (regex, node, replacementNode, opts, nodeBounded) {
     return replaceUnbounded(regex, node, replacementNode, opts);
 }
 
-function forEachBounded (regex, node, cb) {
+function forEachBounded (regex, node, cb, thisObj) {
+    regex = getRegex(regex);
+    
+    var matches, n0, i = 0;
+    thisObj = thisObj || null;
+    // Todo: Fix this for our exec!
+    while ((matches = regex.exec(str)) !== null) {
+        n0 = matches.splice(0, 1);
+        cb.apply(thisObj, matches.concat(i++, n0));
+    }
+}
+
+function forEachUnbounded (regex, node, cb, thisObj) {
     regex = getRegex(regex);
     
 }
 
-function forEachUnbounded (regex, node, cb) {
-    regex = getRegex(regex);
-    
-}
-
-function forEach (regex, node, cb, nodeBounded) {
+function forEach (regex, node, cb, thisObj, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
-        return forEachBounded(regex, node, cb);
+        return forEachBounded(regex, node, cb, thisObj);
     }
-    return forEachUnbounded(regex, node, cb);
+    return forEachUnbounded(regex, node, cb, thisObj);
 }
 
 // Todo: other array extras
