@@ -327,6 +327,7 @@ function search (regex, node, nodeBounded) {
 
 /**
 * @todo Finish creating default option to treat as with RegExp.prototype.exec and only return one at a time; need to deal with lastIndex
+* @todo Deal with multiple matches within a text node
 */
 function execBounded (regex, node, opts) {
     opts = opts || {};
@@ -339,6 +340,8 @@ function execBounded (regex, node, opts) {
     if (flatten && all) {
         ret = [];
     }
+    var oldLastIndex = regex.lastIndex;
+    var lastCumulativeIndex = 0;
 
     var findInnerMatches = all ?
         function findInnerMatches (regex, node) {
@@ -368,11 +371,13 @@ function execBounded (regex, node, opts) {
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
-                    var retArr = regex.exec(contents);
-                    if (retArr) {
-                        retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                    var retArr;
+                    while ((retArr = regex.exec(contents)) !== null) {
+                        if (retArr) {
+                            retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                        }
+                        regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                     }
-                    regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                     return retArr;
                 }
             }));
@@ -388,11 +393,13 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var retArr = regex.exec(contents);
+                    lastCumulativeIndex += contents.length;
                     if (retArr) {
                         ret = retArr;
+                        // Todo: Need to check against lastCumulativeIndex
+                        retArr.lastCumulativeIndex = lastCumulativeIndex + regex.lastIndex; // todo: test/fix
                         retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
                     }
-                    // regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                     return retArr;
                 }
             }));
