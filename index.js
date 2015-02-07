@@ -9,6 +9,20 @@ if (exports) { // Todo: Implement pseudo-Range for jsdom to get working with Nod
     window = document.parentWindow;
 }
 
+function nodeHandlerBoilerplate (obj) {
+    return Object.assign(obj, {
+        document: function (node) {
+            return this.element(node);
+        },
+        documentFragment: function (node) {
+            return this.element(node);
+        },
+        cdata: function (node) {
+            return this.text(node);
+        }
+    });
+}
+
 function getRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex);
 }
@@ -131,18 +145,9 @@ function splitBounded (regex, node, opts) {
             return found[1] ? cloneFoundMatches(arr, found[1]) : arr; // Keep splitting if post present
         }
 
-        return handleNode(node, {
+        return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
                 return Array.from(node.childNodes).reduce(cloneFoundMatches, []);
-            },
-            document: function (node) {
-                return this.element(node);
-            },
-            documentFragment: function (node) {
-                return this.element(node);
-            },
-            cdata: function (node) {
-                return this.text(node);
             },
             text: function (node) {
                 var contents = node.nodeValue;
@@ -166,7 +171,7 @@ function splitBounded (regex, node, opts) {
                 r.text = true;
                 return r;
             }
-        });
+        }));
     }
     var ret = cloneInnerMatches(range, regex, node);
     if (opts && opts.returnType) {
@@ -208,47 +213,29 @@ function testBounded (regex, node) {
             return findInnerMatches(regex, node);
         }
 
-        return handleNode(node, {
+        return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
                 return Array.from(node.childNodes).some(findMatches);
-            },
-            document: function (node) {
-                return this.element(node);
-            },
-            documentFragment: function (node) {
-                return this.element(node);
-            },
-            cdata: function (node) {
-                return this.text(node);
             },
             text: function (node) {
                 var contents = node.nodeValue;
                 return regex.test(contents);
             }
-        });
+        }));
     }
     return findInnerMatches(regex, node);
 }
 
 function testUnbounded (regex, node) {
     regex = getRegex(regex);
-    return handleNode(node, {
+    return handleNode(node, nodeHandlerBoilerplate({
         element: function (node) {
             return regex.test(node.textContent);
-        },
-        document: function (node) {
-            return this.element(node);
-        },
-        documentFragment: function (node) {
-            return this.element(node);
-        },
-        cdata: function (node) {
-            return this.text(node);
         },
         text: function (node) {
             return regex.test(node.nodeValue);
         }
-    });
+    }));
 }
 
 function test (regex, node, nodeBounded) {
@@ -276,24 +263,15 @@ function searchBounded (regex, node, opts) {
                 arr = arr.concat(found);
                 return arr;
             }
-            return handleNode(node, {
+            return handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return Array.from(node.childNodes).reduce(findMatches, []);
-                },
-                document: function (node) {
-                    return this.element(node);
-                },
-                documentFragment: function (node) {
-                    return this.element(node);
-                },
-                cdata: function (node) {
-                    return this.text(node);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
                     return searchPositions(contents, regex);
                 }
-            });
+            }));
         } :
         function (regex, node) {
             function findMatch (idx, node) {
@@ -303,24 +281,15 @@ function searchBounded (regex, node, opts) {
                 return findInnerMatches(regex, node);
             }
 
-            return handleNode(node, {
+            return handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return Array.from(node.childNodes).reduce(findMatch, -1);
-                },
-                document: function (node) {
-                    return this.element(node);
-                },
-                documentFragment: function (node) {
-                    return this.element(node);
-                },
-                cdata: function (node) {
-                    return this.text(node);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
                     return contents.search(regex);
                 }
-            });
+            }));
         };
     return findInnerMatches(regex, node);
 }
@@ -333,21 +302,12 @@ function searchBounded (regex, node, opts) {
 */
 function searchUnbounded (regex, node) {
     regex = getRegex(regex);
-    return handleNode(node, {
+    return handleNode(node, nodeHandlerBoilerplate({
         element: function (node) {
             if (regex.global) {
                 return searchPositions(node.textContent, regex);
             }
             return node.textContent.search(regex);
-        },
-        document: function (node) {
-            return this.element(node);
-        },
-        documentFragment: function (node) {
-            return this.element(node);
-        },
-        cdata: function (node) {
-            return this.text(node);
         },
         text: function (node) {
             if (regex.global) {
@@ -355,7 +315,7 @@ function searchUnbounded (regex, node) {
             }
             return node.nodeValue.search(regex);
         }
-    });
+    }));
 }
 
 function search (regex, node, nodeBounded) {
@@ -402,18 +362,9 @@ function execBounded (regex, node, opts) {
                 return arr;
             }
 
-            return handleNode(node, {
+            return handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return Array.from(node.childNodes).reduce(findMatches, []);
-                },
-                document: function (node) {
-                    return this.element(node);
-                },
-                documentFragment: function (node) {
-                    return this.element(node);
-                },
-                cdata: function (node) {
-                    return this.text(node);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
@@ -424,24 +375,15 @@ function execBounded (regex, node, opts) {
                     regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                     return retArr;
                 }
-            });
+            }));
         } :
         function findInnerMatches (regex, node) {
             function findMatches (node) {
                 return findInnerMatches(regex, node);
             }
-            handleNode(node, {
+            handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return Array.from(node.childNodes).some(findMatches);
-                },
-                document: function (node) {
-                    return this.element(node);
-                },
-                documentFragment: function (node) {
-                    return this.element(node);
-                },
-                cdata: function (node) {
-                    return this.text(node);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
@@ -453,7 +395,7 @@ function execBounded (regex, node, opts) {
                     // regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                     return retArr;
                 }
-            });
+            }));
             return ret;
         };
     var innerMatches = findInnerMatches(regex, node);
@@ -511,24 +453,15 @@ function matchBounded (regex, node, opts) {
             return arr;
         }
 
-        return handleNode(node, {
+        return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
                 return Array.from(node.childNodes).reduce(findMatches, []);
-            },
-            document: function (node) {
-                return this.element(node);
-            },
-            documentFragment: function (node) {
-                return this.element(node);
-            },
-            cdata: function (node) {
-                return this.text(node);
             },
             text: function (node) {
                 var contents = node.nodeValue;
                 return contents.match(regex);
             }
-        });
+        }));
     }
     var innerMatches = findInnerMatches(regex, node);
     return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
@@ -560,18 +493,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
             return findInnerMatches(regex, node);
         }
 
-        return handleNode(node, {
+        return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
                 return Array.from(node.childNodes).some(findMatches);
-            },
-            document: function (node) {
-                return this.element(node);
-            },
-            documentFragment: function (node) {
-                return this.element(node);
-            },
-            cdata: function (node) {
-                return this.text(node);
             },
             text: function (node) {
                 var contents = node.nodeValue;
@@ -589,7 +513,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                     return true;
                 }
             }
-        });
+        }));
     }
     return node;
 }
