@@ -366,59 +366,100 @@ function search (regex, node, nodeBounded) {
 }
 
 /**
-* @todo Consider whether to treat as with RegExp.prototype.exec and only return one at a time (or option to do this)
+* @todo Finish creating default option to treat as with RegExp.prototype.exec and only return one at a time; need to deal with lastIndex
 */
 function execBounded (regex, node, opts) {
-    regex = getRegex(regex); // Todo: drop global as with split?
+    if (regex && typeof regex === 'object' && !regex.global) { // If one doesn't wish a copy, require global as with RegExp.prototype.exec
+        regex = getRegex(regex); // Todo: drop global as with split?
+    }
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
+    var all = opts.hasOwnProperty('all') ? opts.all : false;
     var ret = null;
-    if (flatten) {
+    if (flatten && all) {
         ret = [];
     }
 
-    function findInnerMatches (regex, node) {
-        function findMatches (arr, node) {
-            var found = findInnerMatches(regex, node);
-            if (found) { // Ignore comment nodes, etc.
-                if (flatten) {
-                    if (typeof found.input === 'string') { // Check for exec() array (which doesn't make sense to flatten)
-                        ret.push(found);
+    var findInnerMatches = all ?
+        function findInnerMatches (regex, node) {
+            function findMatches (arr, node) {
+                var found = findInnerMatches(regex, node);
+                if (found) { // Ignore comment nodes, etc.
+                    if (flatten) {
+                        if (typeof found.input === 'string') { // Check for exec() array (which doesn't make sense to flatten)
+                            ret.push(found);
+                        }
+                        else { // Handle element array
+                            ret = ret.concat(found);
+                        }
                     }
-                    else { // Handle element array
-                        ret = ret.concat(found);
+                    else {
+                        if (Array.isArray(found) && found.length) {
+                            arr.push(found);
+                        }
                     }
                 }
-                else {
-                    if (Array.isArray(found) && found.length) {
-                        arr.push(found);
-                    }
-                }
+                return arr;
             }
-            return arr;
-        }
 
-        return handleNode(node, {
-            element: function (node) {
-                return Array.from(node.childNodes).reduce(findMatches, []);
-            },
-            document: function (node) {
-                return this.element(node);
-            },
-            documentFragment: function (node) {
-                return this.element(node);
-            },
-            cdata: function (node) {
-                return this.text(node);
-            },
-            text: function (node) {
-                var contents = node.nodeValue;
-                regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
-                return regex.exec(contents);
+            return handleNode(node, {
+                element: function (node) {
+                    return Array.from(node.childNodes).reduce(findMatches, []);
+                },
+                document: function (node) {
+                    return this.element(node);
+                },
+                documentFragment: function (node) {
+                    return this.element(node);
+                },
+                cdata: function (node) {
+                    return this.text(node);
+                },
+                text: function (node) {
+                    var contents = node.nodeValue;
+                    var retArr = regex.exec(contents);
+                    if (retArr) {
+                        retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                    }
+                    regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
+                    return retArr;
+                }
+            });
+        } :
+        function findInnerMatches (regex, node) {
+            function findMatches (node) {
+                return findInnerMatches(regex, node);
             }
-        });
-    }
+            handleNode(node, {
+                element: function (node) {
+                    return Array.from(node.childNodes).some(findMatches);
+                },
+                document: function (node) {
+                    return this.element(node);
+                },
+                documentFragment: function (node) {
+                    return this.element(node);
+                },
+                cdata: function (node) {
+                    return this.text(node);
+                },
+                text: function (node) {
+                    var contents = node.nodeValue;
+                    var retArr = regex.exec(contents);
+                    if (retArr) {
+                        ret = retArr;
+                        retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                    }
+                    // regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
+                    return retArr;
+                }
+            });
+            return ret;
+        };
     var innerMatches = findInnerMatches(regex, node);
+    if (!all) {
+        return innerMatches;
+    }
     if (flatten) {
         return (node.nodeType === 3) ? innerMatches : ret; // Ensure value gets returned if this is a sole text node
     }
