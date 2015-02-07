@@ -10,9 +10,13 @@
 window.addEventListener('DOMContentLoaded', function () {
 
 alert( // document.body.appendChild(
-    // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // <p>This is a </p>,<p> <b>and another </b></p>,<p><b></b> and yet another <i></i></p>
-    // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
-    DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["test"]], [["test"]]  ]
+    JSON.stringify(
+        // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
+        // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
+        DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["test"]], [["test"]]  ]
+        // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: false}) // [  ["test", "es"], [["test", "es"]], [["test", "es"]]  ]
+        // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: true}) // [  ["test", "es"], ["test", "es"], ["test", "es"]  ]
+    )
 );
 
 });

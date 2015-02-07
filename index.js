@@ -373,6 +373,10 @@ function execBounded (regex, node, opts) {
     // flatten?
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
+    var ret = null;
+    if (flatten) {
+        ret = [];
+    }
 
     if (!regex.global) {
         return execBounded(regex, node, opts);
@@ -381,12 +385,19 @@ function execBounded (regex, node, opts) {
     function findInnerMatches (regex, node) {
         function findMatches (arr, node) {
             var found = findInnerMatches(regex, node);
-            if (found) { // Ignore comment nodes
+            if (found) { // Ignore comment nodes, etc.
                 if (flatten) {
-                    arr = arr.concat(found);
+                    if (typeof found.input === 'string') { // Check for exec() array (which doesn't make sense to flatten)
+                        ret.push(found);
+                    }
+                    else { // Handle element array
+                        ret = ret.concat(found);
+                    }
                 }
                 else {
-                    arr.push(found);
+                    if (Array.isArray(found) && found.length) {
+                        arr.push(found);
+                    }
                 }
             }
             return arr;
@@ -407,12 +418,16 @@ function execBounded (regex, node, opts) {
             },
             text: function (node) {
                 var contents = node.nodeValue;
-                return contents.match(regex);
+                regex.lastIndex = 0;
+                return regex.exec(contents);
             }
         });
     }
     var innerMatches = findInnerMatches(regex, node);
-    return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
+    if (flatten) {
+        return (node.nodeType === 3) ? innerMatches : ret; // Ensure value gets returned if this is a sole text node
+    }
+    return innerMatches[0]; // Deal with extra array that we created
 }
 
 function execUnbounded (regex, node, opts) {
@@ -449,7 +464,7 @@ function matchBounded (regex, node, opts) {
     function findInnerMatches (regex, node) {
         function findMatches (arr, node) {
             var found = findInnerMatches(regex, node);
-            if (found) { // Ignore comment nodes
+            if (found) { // Ignore comment nodes, etc.
                 if (flatten) {
                     arr = arr.concat(found);
                 }
