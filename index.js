@@ -334,7 +334,7 @@ function execBounded (regex, node, opts) {
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
     if (all || (regex && typeof regex === 'object' && !regex.global)) { // Modify supplied RegExp (its lastIndex) if not returning all and is global (as with RegExp.prototype.exec behavior)
-        regex = getRegex(regex); // Todo: drop global as with split?
+        regex = getRegex(regex);
     }
     var ret = null;
     if (flatten && all) {
