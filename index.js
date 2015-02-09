@@ -337,9 +337,6 @@ function execBounded (regex, node, opts) {
         regex = getRegex(regex);
     }
     var ret = null;
-    if (flatten && all) {
-        ret = [];
-    }
     var oldLastIndex = regex.lastIndex;
     var lastCumulativeIndex = 0;
 
@@ -349,17 +346,10 @@ function execBounded (regex, node, opts) {
                 var found = findInnerMatches(regex, node);
                 if (found) { // Ignore comment nodes, etc.
                     if (flatten) {
-                        if (typeof found.input === 'string') { // Check for exec() array (which doesn't make sense to flatten)
-                            ret.push(found);
-                        }
-                        else { // Handle element array
-                            ret = ret.concat(found);
-                        }
+                        arr = arr.concat(found);
                     }
-                    else {
-                        if (Array.isArray(found) && found.length) {
-                            arr.push(found);
-                        }
+                    else if (Array.isArray(found) && found.length) {
+                        arr.push(found);
                     }
                 }
                 return arr;
@@ -371,15 +361,19 @@ function execBounded (regex, node, opts) {
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
-                    var retArr;
+                    var execArr, execArrs = [];
                     // Todo: Fix
-                    while ((retArr = regex.exec(contents)) !== null) {
-                        if (retArr) {
-                            retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                    while ((execArr = regex.exec(contents)) !== null) {
+                        execArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                        // regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
+                        if (flatten) {
+                            execArrs.push(execArr);
                         }
-                        regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
+                        else {
+                            execArrs = execArrs.concat(execArr);
+                        }
                     }
-                    return retArr;
+                    return execArrs.length ? execArrs : null;
                 }
             }));
         } :
@@ -407,11 +401,8 @@ function execBounded (regex, node, opts) {
             return ret;
         };
     var innerMatches = findInnerMatches(regex, node);
-    if (!all) {
+    if (!all || flatten || !innerMatches) {
         return innerMatches;
-    }
-    if (flatten) {
-        return (node.nodeType === 3) ? innerMatches : ret; // Ensure value gets returned if this is a sole text node
     }
     return innerMatches[0]; // Deal with extra array that we created
 }
