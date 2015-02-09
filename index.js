@@ -336,7 +336,6 @@ function execBounded (regex, node, opts) {
     if (all || (regex && typeof regex === 'object' && !regex.global)) { // Modify supplied RegExp (its lastIndex) if not returning all and is global (as with RegExp.prototype.exec behavior)
         regex = getRegex(regex);
     }
-    var ret = null;
     var oldLastIndex = regex.lastIndex;
     var lastCumulativeIndex = 0;
 
@@ -365,7 +364,6 @@ function execBounded (regex, node, opts) {
                     // Todo: Fix
                     while ((execArr = regex.exec(contents)) !== null) {
                         execArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
-                        // regex.lastIndex = 0; // To avoid recursion when global flag is set (without global, it will remain 0 anyways)
                         if (flatten) {
                             execArrs.push(execArr);
                         }
@@ -381,24 +379,22 @@ function execBounded (regex, node, opts) {
             function findMatches (node) {
                 return findInnerMatches(regex, node);
             }
-            handleNode(node, nodeHandlerBoilerplate({
+            return handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return Array.from(node.childNodes).some(findMatches);
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
-                    var retArr = regex.exec(contents);
-                    lastCumulativeIndex += contents.length;
-                    if (retArr) {
-                        ret = retArr;
+                    var execArr;
+                    while ((execArr = regex.exec(contents)) !== null) {
+                        lastCumulativeIndex += contents.length;
                         // Todo: Need to check against lastCumulativeIndex
-                        retArr.lastCumulativeIndex = lastCumulativeIndex + regex.lastIndex; // todo: test/fix
-                        retArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                        execArr.lastCumulativeIndex = lastCumulativeIndex + regex.lastIndex; // todo: test/fix
+                        execArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
                     }
-                    return retArr;
+                    return execArr;
                 }
             }));
-            return ret;
         };
     var innerMatches = findInnerMatches(regex, node);
     if (!all || flatten || !innerMatches) {
@@ -412,7 +408,7 @@ function execUnbounded (regex, node, opts) {
     
 }
 
-function exec (regex, node, nodeBounded) {
+function exec (regex, node, opts, nodeBounded) {
     regex = getRegex(regex);
     if (nodeBounded) {
         return execBounded(regex, node, opts);
@@ -546,7 +542,7 @@ function forEachBounded (regex, node, cb, thisObj) {
     var matches, n0, i = 0;
     thisObj = thisObj || null;
     // Todo: Fix this for our exec!
-    while ((matches = regex.exec(str)) !== null) {
+    while ((matches = regex.exec(node.textContent)) !== null) {
         n0 = matches.splice(0, 1);
         cb.apply(thisObj, matches.concat(i++, n0));
     }
