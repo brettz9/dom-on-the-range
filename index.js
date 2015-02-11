@@ -336,8 +336,8 @@ function execBounded (regex, node, opts) {
     if (all || (regex && typeof regex === 'object' && !regex.global)) { // Modify supplied RegExp (its lastIndex) if not returning all and is global (as with RegExp.prototype.exec behavior)
         regex = getRegex(regex);
     }
-    var oldLastIndex = regex.lastIndex;
-    var lastCumulativeIndex = 0;
+    regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
+    var oldLastCumulativeIndex = regex.lastCumulativeIndex;
 
     var findInnerMatches = all ?
         function findInnerMatches (regex, node) {
@@ -386,13 +386,16 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var execArr;
+                    regex.lastIndex = 0;
                     while ((execArr = regex.exec(contents)) !== null) {
-                        lastCumulativeIndex += contents.length;
-                        // Todo: Need to check against lastCumulativeIndex
-                        execArr.lastCumulativeIndex = lastCumulativeIndex + regex.lastIndex; // todo: test/fix
-                        execArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
+                        regex.lastCumulativeIndex += regex.lastIndex;
+                        if (regex.lastCumulativeIndex > oldLastCumulativeIndex) {
+                            execArr.lastCumulativeIndex = regex.lastCumulativeIndex; // Copy this potentially useful property
+                            return execArr;
+                        }
                     }
-                    return execArr;
+                    regex.lastCumulativeIndex += contents.length - regex.lastIndex; // Add remainder
+                    return null;
                 }
             }));
         };
