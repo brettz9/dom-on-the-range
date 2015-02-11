@@ -331,14 +331,18 @@ function search (regex, node, nodeBounded) {
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] Whether or not to flatten the return array for any results. Does not completely flatten the array but avoids nesting arrays for nested text nodes.
 * @param {boolean} [opts.all=false] Whether or not to return all results in the node at once or not.
-* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins). Note that `lastCumulativeIndex` will also be added as an object property on the return array for convenience.
+* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins). Note that `lastCumulativeIndex` and `lastIndex` will also be added as an object property on the return array for convenience.
 */
 function execBounded (regex, node, opts) {
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
-    if (all || (regex && typeof regex === 'object' && !regex.global)) { // Modify supplied RegExp (its lastIndex) if not returning all and is global (as with RegExp.prototype.exec behavior)
-        regex = getRegex(regex);
+    var regexGlobal = false;
+    var ret = [];
+    if (all) { // Modify supplied RegExp (its lastIndex) if not returning all
+        regex = getRegex(regex); // Convert any string to object
+        regexGlobal = regex.global; // Save original global state
+        regex = cloneRegex(regex, {global: true}); // Ensure we can safely get all values
     }
     regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
     var oldLastCumulativeIndex = regex.lastCumulativeIndex;
@@ -349,10 +353,14 @@ function execBounded (regex, node, opts) {
             function findMatches (arr, node) {
                 var found = findInnerMatches(regex, node);
                 if (found) { // Ignore comment nodes, etc.
-                    if (flatten) {
+                    if (flatten && regexGlobal) {
                         arr = arr.concat(found);
                     }
-                    else if (Array.isArray(found) && found.length) {
+                    else if (flatten) {
+                        ret.push(found);
+                        return ret;
+                    }
+                    else {
                         arr.push(found);
                     }
                 }
@@ -366,14 +374,19 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var execArr, execArrs = [];
-                    // Todo: Fix
+                    
+                    // Todo: Deal with non-global (need to do non-global exec)
+                    
                     while ((execArr = regex.exec(contents)) !== null) {
-                        execArr.lastIndex = regex.lastIndex; // Copy this potentially useful property
-                        if (flatten) {
-                            execArrs.push(execArr);
+                        execArr.lastIndex = regex.lastIndex; // Copy if desired for any reason
+                        // Todo: Add and copy cumulative index here too?
+                        
+
+                        if (flatten && regexGlobal) {
+                            execArrs = execArrs.concat(execArr);
                         }
                         else {
-                            execArrs = execArrs.concat(execArr);
+                            execArrs.push(execArr);
                         }
                     }
                     return execArrs.length ? execArrs : null;
@@ -400,6 +413,7 @@ function execBounded (regex, node, opts) {
                         cumulativeIndex += regex.lastIndex;
                         if (cumulativeIndex > oldLastCumulativeIndex) {
                             regex.lastCumulativeIndex = cumulativeIndex;
+                            execArr.lastIndex = regex.lastIndex; // Copy in case desired for whatever reason
                             execArr.lastCumulativeIndex = regex.lastCumulativeIndex; // Copy this potentially useful property
                             return execArr;
                         }
@@ -410,6 +424,9 @@ function execBounded (regex, node, opts) {
             }));
         };
     var innerMatches = findInnerMatches(regex, node);
+    if (ret.length) {
+        return ret;
+    }
     if (!all || flatten || !innerMatches) {
         return innerMatches;
     }
