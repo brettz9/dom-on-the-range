@@ -331,7 +331,7 @@ function search (regex, node, nodeBounded) {
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] Whether or not to flatten the return array for any results. Does not completely flatten the array but avoids nesting arrays for nested text nodes.
 * @param {boolean} [opts.all=false] Whether or not to return all results in the node at once or not.
-* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins).
+* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins). Note that `lastCumulativeIndex` will also be added as an object property on the return array for convenience.
 */
 function execBounded (regex, node, opts) {
     opts = opts || {};
