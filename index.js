@@ -338,6 +338,7 @@ function execBounded (regex, node, opts) {
     }
     regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
     var oldLastCumulativeIndex = regex.lastCumulativeIndex;
+    var cumulativeIndex = 0;
 
     var findInnerMatches = all ?
         function findInnerMatches (regex, node) {
@@ -376,25 +377,30 @@ function execBounded (regex, node, opts) {
             }));
         } :
         function findInnerMatches (regex, node) {
+            var result = {found: false};
             function findMatches (node) {
-                return findInnerMatches(regex, node);
+                result.found = findInnerMatches(regex, node);
+                return result.found;
             }
-            return handleNode(node, nodeHandlerBoilerplate({
-                element: function (node) {
-                    return Array.from(node.childNodes).some(findMatches);
+            return handleNode(node, result, nodeHandlerBoilerplate({
+                element: function (node, result) {
+                    if (Array.from(node.childNodes).some(findMatches)) {
+                        return result.found;
+                    }
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
                     var execArr;
                     regex.lastIndex = 0;
                     while ((execArr = regex.exec(contents)) !== null) {
-                        regex.lastCumulativeIndex += regex.lastIndex;
-                        if (regex.lastCumulativeIndex > oldLastCumulativeIndex) {
+                        cumulativeIndex += regex.lastIndex;
+                        if (cumulativeIndex > oldLastCumulativeIndex) {
+                            regex.lastCumulativeIndex = cumulativeIndex;
                             execArr.lastCumulativeIndex = regex.lastCumulativeIndex; // Copy this potentially useful property
                             return execArr;
                         }
                     }
-                    regex.lastCumulativeIndex += contents.length - regex.lastIndex; // Add remainder
+                    cumulativeIndex += contents.length - regex.lastIndex; // Add remainder
                     return null;
                 }
             }));

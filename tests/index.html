@@ -10,8 +10,8 @@
 window.addEventListener('DOMContentLoaded', function () {
 
 var regex = /t(e.)t/g;
-// alert(DOTR.execBounded(regex, document.body, {flatten: false}).lastIndex)
-// alert(DOTR.execBounded(regex, document.body, {flatten: false}).lastIndex)
+alert(DOTR.execBounded(regex, document.body, {flatten: false}))
+alert(DOTR.execBounded(regex, document.body, {flatten: false}))
 alert(JSON.stringify(
 DOTR.execBounded(regex, document.body, {flatten: false, all:false}))
 );
@@ -33,7 +33,7 @@ alert( // document.body.appendChild(
 </head>
 <body>
 
-<p>This is a test <b>and another test</b> and yet another <i>test</i>.</p>
+<p>This is a test <b>and another teSt</b> and yet another <i>test</i>.</p>
 
 </body>
 </html>
