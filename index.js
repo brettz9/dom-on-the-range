@@ -331,18 +331,15 @@ function search (regex, node, nodeBounded) {
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] Whether or not to flatten the return array for any results. Does not completely flatten the array but avoids nesting arrays for nested text nodes.
 * @param {boolean} [opts.all=false] Whether or not to return all results in the node at once or not.
-* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins). Note that `lastCumulativeIndex` and `lastIndex` will also be added as an object property on the return array for convenience.
+* @returns {null|array} If no matches are found, `null` will be returned. If `opts.all` is set to true, then an array of all results in the node are returned (flattened or not, depending on opts.flatten; if not flattened, there will be one array containing arrays for each non-null result text node containing arrays for each exec result; if flattened, there will be one array containing arrays for each exec result). If `opts.all` is not set or set to false, then an array containing the results of the first successful node-internal exec match will be returned (if the search is global, any previous lastCumulativeIndex property will be used to increase the point at which searching begins). Note that `lastCumulativeIndex` and `lastIndex` will also be added as an object property on the return array for convenience.
 */
 function execBounded (regex, node, opts) {
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
-    var regexGlobal = false;
     var ret = [];
     if (all) { // Modify supplied RegExp (its lastIndex) if not returning all
-        regex = getRegex(regex); // Convert any string to object
-        regexGlobal = regex.global; // Save original global state
-        regex = cloneRegex(regex, {global: true}); // Ensure we can safely get all values
+        regex = cloneRegex(getRegex(regex), {global: true}); // Ensure we can safely get all values
     }
     regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
     var oldLastCumulativeIndex = regex.lastCumulativeIndex;
@@ -353,12 +350,11 @@ function execBounded (regex, node, opts) {
             function findMatches (arr, node) {
                 var found = findInnerMatches(regex, node);
                 if (found) { // Ignore comment nodes, etc.
-                    if (flatten && regexGlobal) {
-                        arr = arr.concat(found);
-                    }
-                    else if (flatten) {
-                        ret.push(found);
-                        return ret;
+                    if (flatten) {
+                        found.forEach(function (f) {
+                            ret.push(f);
+                        });
+                        return arr;
                     }
                     else {
                         arr.push(found);
@@ -375,19 +371,10 @@ function execBounded (regex, node, opts) {
                     var contents = node.nodeValue;
                     var execArr, execArrs = [];
                     
-                    // Todo: Deal with non-global (need to do non-global exec)
-                    
                     while ((execArr = regex.exec(contents)) !== null) {
                         execArr.lastIndex = regex.lastIndex; // Copy if desired for any reason
                         // Todo: Add and copy cumulative index here too?
-                        
-
-                        if (flatten && regexGlobal) {
-                            execArrs = execArrs.concat(execArr);
-                        }
-                        else {
-                            execArrs.push(execArr);
-                        }
+                        execArrs.push(execArr);
                     }
                     return execArrs.length ? execArrs : null;
                 }
