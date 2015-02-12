@@ -219,7 +219,9 @@ function testBounded (regex, node) {
             },
             text: function (node) {
                 var contents = node.nodeValue;
-                return regex.test(contents);
+                var ret = regex.test(contents);
+                regex.lastIndex = 0;
+                return ret;
             }
         }));
     }
@@ -510,8 +512,8 @@ function replaceBounded (regex, node, opts, replacementNode) {
             },
             text: function (node) {
                 var contents = node.nodeValue;
+                regex.lastIndex = 0;
                 var found = regex.test(contents);
-                
                 /*
                 Todo: Implement, also enabling option to surround contents, borrowing from https://github.com/padolsey/findAndReplaceDOMText
                 range.setStart(node, matchStart);
