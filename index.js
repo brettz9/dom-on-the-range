@@ -498,7 +498,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
     if (!opts.replaceNode) {
         node = node.cloneNode(true);
     }
-
+// todo: for portion, allow retain, first, and encapsulate (if results all share a single common parent and only one wrapper is desired)
     function findInnerMatches (regex, node) {
         function findMatches (node) {
             return findInnerMatches(regex, node);
@@ -541,7 +541,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
 /**
 * @param {RegExp|string} regex A regular expression (as string or RegExp)
 * @param {Node|string} node A DOM Node in which to seek text to replace
-* @param {Node|string} replacementNode A DOM Node or a string
+* @param {Node|string|function} replacementNode A DOM Node, a string, or callback that will be passed the portion and match
 * @param {object} [opts] Options object
 * @param {boolean} nodeBounded
 */
