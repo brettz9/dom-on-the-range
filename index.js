@@ -516,6 +516,8 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 var found = regex.test(contents);
                 /*
                 Todo: Implement, also enabling option to surround contents, borrowing from https://github.com/padolsey/findAndReplaceDOMText
+                // Todo: Check findAndReplaceDOMText for any useful forks, outstanding issues, etc.
+                // Todo: Switch to using object arguments?
                 range.setStart(node, matchStart);
                 range.setEnd(node, matchEnd);
                 range.deleteContents();
