@@ -381,16 +381,15 @@ function execBounded (regex, node, opts) {
             }));
         } :
         function findInnerMatches (regex, node) {
-            var result = {found: false};
+            var result = {found: null};
             function findMatches (node) {
                 result.found = findInnerMatches(regex, node);
                 return result.found;
             }
             return handleNode(node, result, nodeHandlerBoilerplate({
                 element: function (node, result) {
-                    if (Array.from(node.childNodes).some(findMatches)) {
-                        return result.found;
-                    }
+                    Array.from(node.childNodes).some(findMatches);
+                    return result.found;
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
@@ -559,7 +558,7 @@ function forEachBounded (regex, node, cb, thisObj) {
     var matches, n0, i = 0;
     thisObj = thisObj || null;
     // Todo: Fix this for our exec!
-    while ((matches = regex.exec(node.textContent)) !== null) {
+    while ((matches = execBounded(regex, node)) !== null) {
         n0 = matches.splice(0, 1);
         cb.apply(thisObj, matches.concat(i++, n0));
     }

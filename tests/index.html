@@ -19,6 +19,19 @@ alert(JSON.stringify(
 );
 */
 
+/*
+var s = '';
+DOTR.forEachBounded(/t(e.)t/g, document.body, function (a, b, c) {
+    s+= this.a + '::' + a + '::' + b + '::' + c + '\n';
+}, {a: 'newThis'});
+alert(s);
+*/
+/*
+newThis::es::0::test
+newThis::eS::1::teSt
+newThis::es::2::test
+*/
+
 alert( // document.body.appendChild(
     JSON.stringify(
         // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
