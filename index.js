@@ -512,6 +512,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
     if (!opts.replaceNode) {
         node = node.cloneNode(true);
     }
+    var method = regex.global ? 'forEach' : 'some';
     function replaceInnerMatches (regex, node) {
         function replaceMatches (node) {
             return replaceInnerMatches(regex, node);
@@ -519,20 +520,21 @@ function replaceBounded (regex, node, opts, replacementNode) {
 
         return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
-                return Array.from(node.childNodes).some(replaceMatches);
+                return Array.from(node.childNodes)[method](replaceMatches);
             },
             text: function (node) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
 
-                var found, newNode, matchStart, matchEnd;
+                var match, newNode, matchStart, matchEnd, found = false;
                 if (regex.global) {
-                    while ((found = regex.exec(contents)) !== null) {
+                    while ((match = regex.exec(contents)) !== null) {
+                        found = true;
                         matchStart = regex.lastIndex;
-                        matchEnd = matchStart + found[0].length;
+                        matchEnd = matchStart + match[0].length;
                         
                         if (typeof replacementNode === 'string') {
-                            newNode = found[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                            newNode = match[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
                             switch (replaceFormat) {
                                 case 'html':
                                     var r = document.createRange();
@@ -565,18 +567,18 @@ function replaceBounded (regex, node, opts, replacementNode) {
                     }
                 }
                 else { // Todo: 
-                    found = regex.exec(contents);
+                    match = regex.exec(contents);
+                    if (match) {
+                        found = true;
+                    }
                 }
-
-                if (found && !regex.global) {
-                    return true;
-                }
+                return found;
             }
         }));
     }
-    var innerMatches = replaceInnerMatches(regex, node);
+    replaceInnerMatches(regex, node);
     
-    return innerMatches;
+    return node;
 }
 
 /**
