@@ -31,8 +31,16 @@ function getSplitSafeRegex (regex) {
     return typeof regex === 'string' ? new RegExp(regex) : cloneRegex(regex, {global: false});
 }
 
+function globalCloneRegex (regex) {
+    return cloneRegex(getRegex(regex), {global: true}); // Ensure we can safely get all values
+}
+
 function getNode (node) {
     return typeof node === 'string' ? document.createTextNode(node) : node;
+}
+
+function escapeRegexReplace (str) {
+    return str.replace(/\$/g, '$$$$');
 }
 
 function textStringify (items) {
@@ -341,7 +349,7 @@ function execBounded (regex, node, opts) {
     var all = opts.hasOwnProperty('all') ? opts.all : false;
     var ret = [];
     if (all) { // Modify supplied RegExp (its lastIndex) if not returning all
-        regex = cloneRegex(getRegex(regex), {global: true}); // Ensure we can safely get all values
+        regex = globalCloneRegex(regex);
     }
     regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
     var oldLastCumulativeIndex = regex.lastCumulativeIndex;
@@ -358,9 +366,7 @@ function execBounded (regex, node, opts) {
                         });
                         return arr;
                     }
-                    else {
-                        arr.push(found);
-                    }
+                    arr.push(found);
                 }
                 return arr;
             }
@@ -492,10 +498,14 @@ function match (regex, node, opts, nodeBounded) {
     return matchUnbounded(regex, node, opts);
 }
 
+/**
+* @todo Switch to using object arguments?
+* @todo Handle text in inputs, textareas, contenteditables?
+*/
 function replaceBounded (regex, node, opts, replacementNode) {
     var range = document.createRange();
     regex = getRegex(regex);
-    replacementNode = getNode(replacementNode);
+    // replacementNode = getNode(replacementNode);
     opts = opts || {};
     var replaceFormat = opts.replaceFormat; // "text", "html"
     var replacePatterns = opts.replacePatterns; // true, false
@@ -503,7 +513,6 @@ function replaceBounded (regex, node, opts, replacementNode) {
     if (!opts.replaceNode) {
         node = node.cloneNode(true);
     }
-// todo: for portion, allow retain, first, and encapsulate (if results all share a single common parent and only one wrapper is desired)
     function replaceInnerMatches (regex, node) {
         function replaceMatches (node) {
             return replaceInnerMatches(regex, node);
@@ -511,24 +520,44 @@ function replaceBounded (regex, node, opts, replacementNode) {
 
         return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
-                return Array.from(node.childNodes).some(findMatches);
+                return Array.from(node.childNodes).some(replaceMatches);
             },
             text: function (node) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
-                var found = contents.match(regex);
-                /*
-                Todo: Implement, also enabling option to surround contents, borrowing from https://github.com/padolsey/findAndReplaceDOMText
-                // Todo: Check findAndReplaceDOMText for any useful forks, outstanding issues, etc.
-                // Todo: Switch to using object arguments?
-                range.setStart(node, matchStart);
-                range.setEnd(node, matchEnd);
-                range.deleteContents();
-                contents.replace(regex, replacementNode);
-                */
-                replaceFormat; // text, html
-                replacePatterns; // boolean
-                wrap; // boolean: whether to see replacementNode string as element name instead of text node content
+
+                var found, newNode, matchStart, matchEnd;
+                if (regex.global) {
+                    while ((found = regex.exec(contents)) !== null) {
+                        matchStart = regex.lastIndex;
+                        matchEnd = matchStart + found[0].length;
+                        
+                        if (typeof replacementNode === 'string') {
+                            newNode = found[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                        }
+                        else {
+                            newNode = replacementNode;
+                        }
+                        switch (replaceFormat) {
+                            case 'html':
+                                
+                                break;
+                            case 'text': default:
+                                
+                                break;
+                        }
+                        if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
+                            
+                        }
+                        range.setStart(node, matchStart);
+                        range.setEnd(node, matchEnd);
+                        range.deleteContents();
+                        range.insertNode(newNode);
+                    }
+                }
+                else {
+                    found = regex.exec(contents);
+                }
 
                 if (found && !regex.global) {
                     return true;
@@ -541,6 +570,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
     return innerMatches;
 }
 
+/**
+*@todo For portion, allow retain, first, and encapsulate (if results all share a single common parent and only one wrapper is desired)
+*/
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
     
