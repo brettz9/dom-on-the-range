@@ -548,7 +548,15 @@ function replaceBounded (regex, node, opts, replacementNode) {
                             newNode = replacementNode;
                         }
                         if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
-                            
+                            if (wrap.nodeType) {
+                                var clone = doc.createElement('div');
+                                clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
+                                wrap = clone.firstChild;
+                            }
+                            else {
+                                wrap = document.createElement(wrap);
+                            }
+                            newNode = wrap.appendChild(newNode);
                         }
                         range.setStart(node, matchStart);
                         range.setEnd(node, matchEnd);
@@ -556,7 +564,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         range.insertNode(newNode);
                     }
                 }
-                else {
+                else { // Todo: 
                     found = regex.exec(contents);
                 }
 
