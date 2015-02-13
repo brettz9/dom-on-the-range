@@ -535,13 +535,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
                             newNode = found[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
                             switch (replaceFormat) {
                                 case 'html':
-                                    var frag = document.createDocumentFragment();
-                                    var el = document.createElement('div');
-                                    el.innerHTML = newNode;
-                                    newNode = Array.from(el.childNodes).reduce(function (frag, node) {
-                                        frag.appendChild(node);
-                                        return frag;
-                                    }, frag);
+                                    var r = document.createRange();
+                                    r.selectNodeContents(node);
+                                    newNode = r.createContextualFragment(newNode);
                                     break;
                                 case 'text': default:
                                     newNode = getNode(newNode);
