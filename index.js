@@ -497,13 +497,16 @@ function replaceBounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
     replacementNode = getNode(replacementNode);
     opts = opts || {};
+    var replaceFormat = opts.replaceFormat; // "text", "html"
+    var replacePatterns = opts.replacePatterns; // true, false
+    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
     if (!opts.replaceNode) {
         node = node.cloneNode(true);
     }
 // todo: for portion, allow retain, first, and encapsulate (if results all share a single common parent and only one wrapper is desired)
-    function findInnerMatches (regex, node) {
-        function findMatches (node) {
-            return findInnerMatches(regex, node);
+    function replaceInnerMatches (regex, node) {
+        function replaceMatches (node) {
+            return replaceInnerMatches(regex, node);
         }
 
         return handleNode(node, nodeHandlerBoilerplate({
@@ -513,7 +516,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
             text: function (node) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
-                var found = regex.test(contents);
+                var found = contents.match(regex);
                 /*
                 Todo: Implement, also enabling option to surround contents, borrowing from https://github.com/padolsey/findAndReplaceDOMText
                 // Todo: Check findAndReplaceDOMText for any useful forks, outstanding issues, etc.
@@ -523,6 +526,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 range.deleteContents();
                 contents.replace(regex, replacementNode);
                 */
+                replaceFormat; // text, html
+                replacePatterns; // boolean
+                wrap; // boolean: whether to see replacementNode string as element name instead of text node content
 
                 if (found && !regex.global) {
                     return true;
@@ -530,16 +536,19 @@ function replaceBounded (regex, node, opts, replacementNode) {
             }
         }));
     }
-    return node;
+    var innerMatches = replaceInnerMatches(regex, node);
+    
+    return innerMatches;
 }
 
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
+    
     replacementNode = getNode(replacementNode);
     if (regex.global) {
         
     }
-    
+
 }
 
 /**
