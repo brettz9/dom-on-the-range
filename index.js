@@ -1,3 +1,4 @@
+/*global XMLSerializer*/
 /*jslint vars:true, node:true, todo:true*/
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
@@ -526,18 +527,19 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
 
-                var match, newNode, matchStart, matchEnd, found = false;
+                var mtch, newNode, matchStart, clone, matchEnd, r, found = false;
                 if (regex.global) {
-                    while ((match = regex.exec(contents)) !== null) {
+                    while ((mtch = regex.exec(contents)) !== null) {
                         found = true;
                         matchStart = regex.lastIndex;
-                        matchEnd = matchStart + match[0].length;
+                        matchEnd = matchStart + mtch[0].length;
                         
-                        if (typeof replacementNode === 'string') {
-                            newNode = match[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                        switch (typeof replacementNode) {
+                        case 'string':
+                            newNode = mtch[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
                             switch (replaceFormat) {
                                 case 'html':
-                                    var r = document.createRange();
+                                    r = document.createRange();
                                     r.selectNodeContents(node);
                                     newNode = r.createContextualFragment(newNode);
                                     break;
@@ -545,13 +547,17 @@ function replaceBounded (regex, node, opts, replacementNode) {
                                     newNode = getNode(newNode);
                                     break;
                             }
-                        }
-                        else {
+                            break;
+                        case 'function':
+                            newNode = mtch[0].replace(regex, replacementNode);
+                            break;
+                        default:
                             newNode = replacementNode;
+                            break;
                         }
                         if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
                             if (wrap.nodeType) {
-                                var clone = doc.createElement('div');
+                                clone = document.createElement('div');
                                 clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
                                 wrap = clone.firstChild;
                             }
@@ -567,8 +573,8 @@ function replaceBounded (regex, node, opts, replacementNode) {
                     }
                 }
                 else { // Todo: 
-                    match = regex.exec(contents);
-                    if (match) {
+                    mtch = regex.exec(contents);
+                    if (mtch) {
                         found = true;
                     }
                 }
