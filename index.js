@@ -505,7 +505,6 @@ function match (regex, node, opts, nodeBounded) {
 function replaceBounded (regex, node, opts, replacementNode) {
     var range = document.createRange();
     regex = getRegex(regex);
-    // replacementNode = getNode(replacementNode);
     opts = opts || {};
     var replaceFormat = opts.replaceFormat; // "text", "html"
     var replacePatterns = opts.replacePatterns; // true, false
@@ -534,17 +533,23 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         
                         if (typeof replacementNode === 'string') {
                             newNode = found[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                            switch (replaceFormat) {
+                                case 'html':
+                                    var frag = document.createDocumentFragment();
+                                    var el = document.createElement('div');
+                                    el.innerHTML = newNode;
+                                    newNode = Array.from(el.childNodes).reduce(function (frag, node) {
+                                        frag.appendChild(node);
+                                        return frag;
+                                    }, frag);
+                                    break;
+                                case 'text': default:
+                                    newNode = getNode(newNode);
+                                    break;
+                            }
                         }
                         else {
                             newNode = replacementNode;
-                        }
-                        switch (replaceFormat) {
-                            case 'html':
-                                
-                                break;
-                            case 'text': default:
-                                
-                                break;
                         }
                         if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
                             
