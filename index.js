@@ -538,7 +538,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
 
                     switch (typeof replacementNode) {
                     case 'string':
-                        newNode = textMatch[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                        newNode = textMatch[0].replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
                         switch (replaceFormat) {
                             case 'html':
                                 r = document.createRange();
@@ -554,7 +554,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         newNode = textMatch[0].replace(regex, replacementNode);
                         break;
                     default:
-                        newNode = replacementNode;
+                        newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
                         break;
                     }
                     if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
@@ -568,8 +568,10 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         }
                         newNode = wrap.appendChild(newNode);
                     }
+
                     range.setStart(node, matchStart);
                     range.setEnd(node, matchEnd);
+
                     range.deleteContents();
                     range.insertNode(newNode);
                     if (!regex.global) {

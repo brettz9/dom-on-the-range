@@ -38,9 +38,12 @@ alert( // document.body.appendChild(
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["teSt"]], [["test"]]  ]
         // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: false, all: true}) // [  [["test", "es"]], [[["teSt", "eS"]]], [[["test", "es"]]]  ]
-        DOTR.execBounded(/t(e.)t/g, document.body, {flatten: true, all: true}) // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
+        // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: true, all: true}) // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
         // DOTR.execBounded(regex, document.body, {flatten: false, all: false}).lastIndex // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
         // DOTR.execBounded(regex, document.body, {flatten: false}) // ["test","es"]
+        
+        DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONEEE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: false, replaceNode: true})
+
     )
 );
 
