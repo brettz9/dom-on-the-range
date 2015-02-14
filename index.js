@@ -527,55 +527,50 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
 
-                var mtch, newNode, matchStart, clone, matchEnd, r, found = false;
-                if (regex.global) {
-                    while ((mtch = regex.exec(contents)) !== null) {
-                        found = true;
-                        matchStart = regex.lastIndex;
-                        matchEnd = matchStart + mtch[0].length;
-                        
-                        switch (typeof replacementNode) {
-                        case 'string':
-                            newNode = mtch[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
-                            switch (replaceFormat) {
-                                case 'html':
-                                    r = document.createRange();
-                                    r.selectNodeContents(node);
-                                    newNode = r.createContextualFragment(newNode);
-                                    break;
-                                case 'text': default:
-                                    newNode = getNode(newNode);
-                                    break;
-                            }
-                            break;
-                        case 'function':
-                            newNode = mtch[0].replace(regex, replacementNode);
-                            break;
-                        default:
-                            newNode = replacementNode;
-                            break;
+                var textMatch, newNode, matchStart, clone, matchEnd, r, found = false;
+                while ((textMatch = regex.exec(contents)) !== null) {
+                    found = true;
+                    matchStart = regex.global ? regex.lastIndex : contents.search(regex);
+                    matchEnd = matchStart + textMatch[0].length;
+
+                    switch (typeof replacementNode) {
+                    case 'string':
+                        newNode = textMatch[0].replace(regex, replacePatterns ? replacementNode : escapeRegexReplace(replacementNode));
+                        switch (replaceFormat) {
+                            case 'html':
+                                r = document.createRange();
+                                r.selectNodeContents(node);
+                                newNode = r.createContextualFragment(newNode);
+                                break;
+                            case 'text': default:
+                                newNode = getNode(newNode);
+                                break;
                         }
-                        if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
-                            if (wrap.nodeType) {
-                                clone = document.createElement('div');
-                                clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
-                                wrap = clone.firstChild;
-                            }
-                            else {
-                                wrap = document.createElement(wrap);
-                            }
-                            newNode = wrap.appendChild(newNode);
-                        }
-                        range.setStart(node, matchStart);
-                        range.setEnd(node, matchEnd);
-                        range.deleteContents();
-                        range.insertNode(newNode);
+                        break;
+                    case 'function':
+                        newNode = textMatch[0].replace(regex, replacementNode);
+                        break;
+                    default:
+                        newNode = replacementNode;
+                        break;
                     }
-                }
-                else { // Todo: 
-                    mtch = regex.exec(contents);
-                    if (mtch) {
-                        found = true;
+                    if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
+                        if (wrap.nodeType) {
+                            clone = document.createElement('div');
+                            clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
+                            wrap = clone.firstChild;
+                        }
+                        else {
+                            wrap = document.createElement(wrap);
+                        }
+                        newNode = wrap.appendChild(newNode);
+                    }
+                    range.setStart(node, matchStart);
+                    range.setEnd(node, matchEnd);
+                    range.deleteContents();
+                    range.insertNode(newNode);
+                    if (!regex.global) {
+                        break;
                     }
                 }
                 return found;
