@@ -533,7 +533,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 while ((textMatch = regex.exec(contents)) !== null) {
                     found = true;
                     len = textMatch[0].length;
-                    matchStart = regex.global ? regex.lastIndex - len : contents.search(regex);
+                    matchStart = regex.global ? regex.lastIndex - len : contents.search(regex); // non-global can't use lastIndex
                     matchEnd = matchStart + len;
 
                     switch (typeof replacementNode) {
