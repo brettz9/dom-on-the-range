@@ -529,10 +529,12 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 regex.lastIndex = 0;
 
                 var textMatch, newNode, matchStart, clone, matchEnd, r, found = false;
+                var len;
                 while ((textMatch = regex.exec(contents)) !== null) {
                     found = true;
-                    matchStart = regex.global ? regex.lastIndex : contents.search(regex);
-                    matchEnd = matchStart + textMatch[0].length;
+                    len = textMatch[0].length;
+                    matchStart = regex.global ? regex.lastIndex - len : contents.search(regex);
+                    matchEnd = matchStart + len;
 
                     switch (typeof replacementNode) {
                     case 'string':
