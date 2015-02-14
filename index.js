@@ -513,6 +513,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
     if (!opts.replaceNode) {
         node = node.cloneNode(true);
     }
+    replacementNode = opts.replacement || replacementNode;
     var method = regex.global ? 'forEach' : 'some';
     function replaceInnerMatches (regex, node) {
         function replaceMatches (node) {
