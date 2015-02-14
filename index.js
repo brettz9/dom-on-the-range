@@ -558,15 +558,17 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         break;
                     }
                     if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
+                        var wrapper;
                         if (wrap.nodeType) {
                             clone = document.createElement('div');
                             clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
-                            wrap = clone.firstChild;
+                            wrapper = clone.firstChild;
                         }
                         else {
-                            wrap = document.createElement(wrap);
+                            wrapper = document.createElement(wrap); // We might instead set "wrap" to the result and let it be used as an object in the next loop
                         }
-                        newNode = wrap.appendChild(newNode);
+                        wrapper.appendChild(newNode);
+                        newNode = wrapper;
                     }
 
                     range.setStart(node, matchStart);
