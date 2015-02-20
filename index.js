@@ -88,17 +88,18 @@ function htmlStringify (items) {
     }
 }
 
-function searchPositions (str, regex) {
+function searchPositions (str, regex, returnLen) {
     var ret = [];
     var offset = 0;
-    var found, len, inc;
+    var found, len, inc, idx;
     while (true) {
         found = str.search(regex);
         if (found === -1) {
             break;
         }
         len = str.match(regex)[0].length;
-        ret.push(offset + found);
+        idx = offset + found;
+        ret.push(returnLen ? [idx, len] : idx);
         inc = found + len;
         offset += inc;
         str = str.slice(inc);
@@ -311,18 +312,20 @@ function searchBounded (regex, node, opts) {
 * @param {RegExp|string} regex This regular expression is required to be continguous within a text node
 * @returns {number|array} If regex is global, an array of positions will be found or an empty array if not found. If regex is not global, the index of the first match will be returned (or -1 if none is found)
 */
-function searchUnbounded (regex, node) {
+function searchUnbounded (regex, node, opts) {
     regex = getRegex(regex);
+    opts = opts || {};
+
     return handleNode(node, nodeHandlerBoilerplate({
         element: function (node) {
             if (regex.global) {
-                return searchPositions(node.textContent, regex);
+                return searchPositions(node.textContent, regex, opts.returnLength);
             }
             return node.textContent.search(regex);
         },
         text: function (node) {
             if (regex.global) {
-                return searchPositions(node.nodeValue, regex);
+                return searchPositions(node.nodeValue, regex, opts.returnLength);
             }
             return node.nodeValue.search(regex);
         }
@@ -490,6 +493,7 @@ function matchBounded (regex, node, opts) {
 function matchUnbounded (regex, node, opts) {
     regex = getRegex(regex);
     opts = opts || {};
+    var ct = 0;
     if (!regex.global) {
         return execUnbounded(regex, node, opts);
     }
@@ -504,11 +508,27 @@ function matchUnbounded (regex, node, opts) {
                 }
             }));
         case 'node': default:
-            var indexes = searchUnbounded(regex, node);
+            var indexes = searchUnbounded(regex, node, {returnLength: true});
             if (!indexes.length) {
                 return null;
             }
+            /*var idx;
+            do {
+                idx = indexes.splice(0, 1)[0];
+                
+            } while (indexes.length);*/
+
             return indexes.map(function (index) {
+                index - ct;
+                
+                return handleNode(node, nodeHandlerBoilerplate({
+                    element: function (node) {
+                        return node.textContent.match(regex);
+                    },
+                    text: function (node) {
+                        return node.nodeValue.match(regex);
+                    }
+                }));
                 
                 switch (opts.returnType) {
                     case 'range':
