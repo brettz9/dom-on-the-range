@@ -504,16 +504,23 @@ function matchUnbounded (regex, node, opts) {
                 }
             }));
         case 'node': default:
-            switch (opts.returnType) {
-                case 'range':
-                    // Todo:
-                    
-                    return;
-                case 'fragment': default:
-                    // Todo:
-                    
-                    return;
+            var indexes = searchUnbounded(regex, node);
+            if (!indexes.length) {
+                return null;
             }
+            return indexes.map(function (index) {
+                
+                switch (opts.returnType) {
+                    case 'range':
+                        // Todo:
+                        
+                        return;
+                    case 'fragment': default:
+                        // Todo:
+                        
+                        return;
+                }                
+            });
     }
 }
 
