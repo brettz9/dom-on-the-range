@@ -33,7 +33,7 @@ newThis::es::2::test
 */
 
 alert( // document.body.appendChild(
-    // JSON.stringify
+    JSON.stringify
     (
         // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
@@ -43,11 +43,14 @@ alert( // document.body.appendChild(
         // DOTR.execBounded(regex, document.body, {flatten: false, all: false}).lastIndex // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
         // DOTR.execBounded(regex, document.body, {flatten: false}) // ["test","es"]
         
-        DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
+        // DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
+        
+        DOTR.searchBounded(regex, document.body, {stringOffsets: true})
 
-    ).outerHTML
+    )
+    // .outerHTML
 );
-
+alert(new XMLSerializer().serializeToString(document.body));
 });
 </script>
 </head>

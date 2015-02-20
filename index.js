@@ -266,42 +266,96 @@ function test (regex, node, nodeBounded) {
 function searchBounded (regex, node, opts) {
     regex = getRegex(regex);
     // node = node.cloneNode(true); // Use this if altering node
-    
-    var findInnerMatches = regex.global ?
-        function (regex, node) {
+    opts = opts || {};
+    var len = 0;
+    var findInnerMatches;
+    if (opts.stringOffsets) {
+        // Tried this, but mimicking outerHTML is too complicated (e.g., various treatments of <p/>, <br />, etc.) and XMLSerializer has namespaces and is less used
+        findInnerMatches = function (regex, node) {
+            function addOpenTagCount (el) {
+                return el.nodeName.length + Array.from(el.attributes).reduce(function (ct, att) {
+                    return ct + att.name.length + att.value.length + 4; // 4 = space + equal + 2 quotes
+                }, 2); // 2 = < + >
+            }
+            function addCloseTagCount (el) {
+                return (el.textContent.length ?
+                        el.nodeName.length + 3 : // Closing tag with slash and <>
+                        1); // Self-closing tag (XML)
+            }
             function findMatches (arr, node) {
                 var found = findInnerMatches(regex, node);
-                arr = arr.concat(found);
+                if (found) {
+                    if (found.results) { // Text node
+                        if (found.results.length) { // Found results
+                            found.results.forEach(function (result) {
+                                arr.push(len + result);
+                            });
+                        }
+                        len += found.len;
+                    }
+                    else { // Element
+                        arr = arr.concat(found);
+                    }
+                }
                 return arr;
             }
             return handleNode(node, nodeHandlerBoilerplate({
+                comment: function (node) {
+                    len += node.nodeValue.length + 7; // 7 = <!-- + -->
+                },
+                processingInstruction: function (node) {
+                    len += node.nodeValue.length + node.target.length + 4; // 4 = <? + ?>
+                },
                 element: function (node) {
-                    return Array.from(node.childNodes).reduce(findMatches, []);
+                    len += addOpenTagCount(node);
+                    var ret = Array.from(node.childNodes).reduce(findMatches, []);
+                    len += addCloseTagCount(node);
+                    return ret;
                 },
                 text: function (node) {
                     var contents = node.nodeValue;
-                    return searchPositions(contents, regex);
-                }
-            }));
-        } :
-        function (regex, node) {
-            function findMatch (idx, node) {
-                if (idx !== -1) {
-                    return idx;
-                }
-                return findInnerMatches(regex, node);
-            }
-
-            return handleNode(node, nodeHandlerBoilerplate({
-                element: function (node) {
-                    return Array.from(node.childNodes).reduce(findMatch, -1);
-                },
-                text: function (node) {
-                    var contents = node.nodeValue;
-                    return contents.search(regex);
+                    return {results: searchPositions(contents, regex), len: contents.length};
                 }
             }));
         };
+    }
+    else {
+        findInnerMatches = regex.global ?
+            function (regex, node) {
+                function findMatches (arr, node) {
+                    var found = findInnerMatches(regex, node);
+                    arr = arr.concat(found);
+                    return arr;
+                }
+                return handleNode(node, nodeHandlerBoilerplate({
+                    element: function (node) {
+                        return Array.from(node.childNodes).reduce(findMatches, []);
+                    },
+                    text: function (node) {
+                        var contents = node.nodeValue;
+                        return searchPositions(contents, regex);
+                    }
+                }));
+            } :
+            function (regex, node) {
+                function findMatch (idx, node) {
+                    if (idx !== -1) {
+                        return idx;
+                    }
+                    return findInnerMatches(regex, node);
+                }
+
+                return handleNode(node, nodeHandlerBoilerplate({
+                    element: function (node) {
+                        return Array.from(node.childNodes).reduce(findMatch, -1);
+                    },
+                    text: function (node) {
+                        var contents = node.nodeValue;
+                        return contents.search(regex);
+                    }
+                }));
+            };
+    }
     return findInnerMatches(regex, node);
 }
 
