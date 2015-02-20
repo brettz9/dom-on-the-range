@@ -660,7 +660,7 @@ exp.htmlStringify = htmlStringify;
 exp.searchPositions = searchPositions;
 
 // MAIN API EXPORTS
-// Todo: export a constructor which allows default regex (and node?) and allows determination of whether to match text within node or across nodes
+// Todo: export a constructor which allows default regex (and/or node?) and allows determination of whether to match text within node or across nodes
 exp.splitUnbounded = splitUnbounded;
 exp.splitBounded = splitBounded;
 exp.split = split;
