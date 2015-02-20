@@ -494,6 +494,15 @@ function matchUnbounded (regex, node, opts) {
         return execUnbounded(regex, node, opts);
     }
     switch (opts.searchType) {
+        case 'text':
+            return handleNode(node, nodeHandlerBoilerplate({
+                element: function (node) {
+                    return node.textContent.match(regex);
+                },
+                text: function (node) {
+                    return node.nodeValue.match(regex);
+                }
+            }));
         case 'node': default:
             switch (opts.returnType) {
                 case 'range':
@@ -505,16 +514,6 @@ function matchUnbounded (regex, node, opts) {
                     
                     return;
             }
-            return;
-        case 'text':
-            return handleNode(node, nodeHandlerBoilerplate({
-                element: function (node) {
-                    return node.textContent.match(regex);
-                },
-                text: function (node) {
-                    return node.nodeValue.match(regex);
-                }
-            }));
     }
 }
 
