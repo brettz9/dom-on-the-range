@@ -489,7 +489,33 @@ function matchBounded (regex, node, opts) {
 
 function matchUnbounded (regex, node, opts) {
     regex = getRegex(regex);
-    
+    opts = opts || {};
+    if (!regex.global) {
+        return execUnbounded(regex, node, opts);
+    }
+    switch (opts.searchType) {
+        case 'node':
+            switch (opts.returnType) {
+                case 'range':
+                    // Todo:
+                    
+                    return;
+                case 'fragment':
+                    // Todo:
+                    
+                    return;
+            }
+            return;
+        case 'text': default:
+            return handleNode(node, nodeHandlerBoilerplate({
+                element: function (node) {
+                    return node.textContent.match(regex);
+                },
+                text: function (node) {
+                    return node.nodeValue.match(regex);
+                }
+            }));
+    }
 }
 
 function match (regex, node, opts, nodeBounded) {
@@ -529,7 +555,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 regex.lastIndex = 0;
 
                 var textMatch, newNode, matchStart, clone, matchEnd, r, found = false;
-                var len;
+                var len, wrapper;
                 while ((textMatch = regex.exec(contents)) !== null) {
                     found = true;
                     len = textMatch[0].length;
@@ -558,7 +584,6 @@ function replaceBounded (regex, node, opts, replacementNode) {
                         break;
                     }
                     if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
-                        var wrapper;
                         if (wrap.nodeType) {
                             clone = document.createElement('div');
                             clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
