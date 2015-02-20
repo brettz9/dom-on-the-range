@@ -494,19 +494,19 @@ function matchUnbounded (regex, node, opts) {
         return execUnbounded(regex, node, opts);
     }
     switch (opts.searchType) {
-        case 'node':
+        case 'node': default:
             switch (opts.returnType) {
                 case 'range':
                     // Todo:
                     
                     return;
-                case 'fragment':
+                case 'fragment': default:
                     // Todo:
                     
                     return;
             }
             return;
-        case 'text': default:
+        case 'text':
             return handleNode(node, nodeHandlerBoilerplate({
                 element: function (node) {
                     return node.textContent.match(regex);
