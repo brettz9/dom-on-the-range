@@ -46,7 +46,7 @@ alert( // document.body.appendChild(
         // DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
         
         // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
-        DOTR.matchUnbounded(/te.t.* and/g, document.body) // [  ["test"], [["teSt"]], [["test"]]  ]
+        DOTR.matchUnbounded(/te.t.*? and/g, document.body) // [  ["test"], [["teSt"]], [["test"]]  ]
     )
     // .outerHTML
 );
