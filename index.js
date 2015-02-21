@@ -544,6 +544,7 @@ function matchUnbounded (regex, node, opts) {
                                 found = document.createRange();
                                 found.setStart(startNode, startIdx);
                                 found.setEnd(node, endIdx);
+                                startFound = false;
                                 return true;
                             }
                             ct += contents.length;
