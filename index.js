@@ -550,11 +550,14 @@ function matchUnbounded (regex, node, opts) {
                             return false;
                         }
                     }));
+                    if (!found) {
+                        return null;
+                    }
                     switch (opts.returnType) {
                         case 'range':
                             return found;
                         case 'fragment': default:
-                            return found && found.cloneContents();
+                            return found.cloneContents();
                     }
                 });
             };
