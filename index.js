@@ -514,15 +514,16 @@ function matchUnbounded (regex, node, opts) {
             var ct = 0;
             var startNode, startIdx;
 
-            var findInnerMatches = function findInnerMatches (regex, node) {
-                function findMatches (node) {
-                    return findInnerMatches(regex, node);
-                }
-                return indexes.map(function (idxObj) {
-                    var start = idxObj[0] - ct;
-                    var end = idxObj[1] - start;
-                    var startFound = false;
-                    var found;
+            return indexes.map(function (idxObj) {
+                var start = idxObj[0] - ct;
+                var end = idxObj[1] - start;
+                var startFound = false;
+                var found;
+
+                var findInnerMatches = function findInnerMatches (regex, node) {
+                    function findMatches (node) {
+                        return findInnerMatches(regex, node);
+                    }
 
                     handleNode(node, nodeHandlerBoilerplate({
                         element: function (node) {
@@ -560,9 +561,9 @@ function matchUnbounded (regex, node, opts) {
                         case 'fragment': default:
                             return found.cloneContents();
                     }
-                });
-            };
-            return findInnerMatches(regex, node);
+                };
+                return findInnerMatches(regex, node);
+            });
     }
 }
 
