@@ -512,57 +512,50 @@ function matchUnbounded (regex, node, opts) {
                 return null;
             }
             var ct = 0;
-            var newNode = node;
+            var startNode, startIdx;
 
             var findInnerMatches = function findInnerMatches (regex, node) {
-                function getFindMatches (obj) {
-                    return function findMatches (node) {
-                        var found = findInnerMatches(regex, node);
-                        if (found) {
-                            obj.found = found;
-                            return true;
-                        }
-                        return false;
-                    };
+                function findMatches (node) {
+                    return findInnerMatches(regex, node);
                 }
-                return indexes.map(function (index) {
-                    var start = index[0] - ct;
-                    var end = index[1] - start;
+                return indexes.map(function (idxObj) {
+                    var start = idxObj[0] - ct;
+                    var end = idxObj[1] - start;
                     var startFound = false;
-                    var obj = {};
+                    var found;
 
-                    return handleNode(node, nodeHandlerBoilerplate({
+                    handleNode(node, nodeHandlerBoilerplate({
                         element: function (node) {
-                            Array.from(node.childNodes).some(getFindMatches(obj));
-                            return obj.found;
+                            return Array.from(node.childNodes).some(findMatches);
                         },
                         text: function (node) {
                             var contents = node.nodeValue;
                             var len = contents.length;
-                            if (startFound) {
-                                // Todo:
-                                switch (opts.returnType) {
-                                    case 'range':
-                                        // Todo:
-                                        
-                                        return;
-                                    case 'fragment': default:
-                                        // Todo:
-                                        
-                                        return;
-                                }
-                                return;
-                            }
-                            if ((ct + len) > start) {
-                                newNode = node;
+                            var endTextNode = ct + len;
+                            if (!startFound && (endTextNode > start)) {
+                                startNode = node;
+                                startIdx = endTextNode - start;
                                 ct += start;
                                 startFound = true;
-                                return (ct + len) > end;
+                            }
+                            if (startFound && (endTextNode <= end)) {
+                                var endIdx = end - endTextNode;
+
+                                found = document.createRange();
+                                found.setStart(startNode, startIdx);
+                                found.setEnd(node, endIdx);
+                                return true;
                             }
                             ct += contents.length;
                             return false;
                         }
                     }));
+                    switch (opts.returnType) {
+                        case 'range':
+                            return found;
+                        case 'fragment': default:
+                            return found && found.cloneContents();
+                    }
                 });
             };
             return findInnerMatches(regex, node);
