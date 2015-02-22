@@ -681,7 +681,10 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     if (regex.global) {
         
     }
-
+    var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'}));
+    matchedRanges.forEach(function (matchedRange) {
+        
+    });
 }
 
 /**
