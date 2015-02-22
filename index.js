@@ -532,12 +532,10 @@ function matchUnbounded (regex, node, opts) {
                         var contents = textNode.nodeValue;
                         var len = contents.length;
                         var endTextNode = ct + len;
-                        var justRan = false;
                         if (!startFound && (endTextNode > start)) {
                             startNode = textNode;
                             startIdx = start - ct;
                             startFound = true;
-                            justRan = true;
                         }
                         if (startFound && (endTextNode > end)) {
                             var endIdx = end - ct;
