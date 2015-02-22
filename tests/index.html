@@ -33,7 +33,7 @@ newThis::es::2::test
 */
 
 alert( // document.body.appendChild(
-    JSON.stringify
+    // JSON.stringify
     (
         // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
@@ -48,6 +48,13 @@ alert( // document.body.appendChild(
         // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
         DOTR.matchUnbounded(/te.t.*? and/g, document.body) // [  ["test"], [["teSt"]], [["test"]]  ]
     )
+    /**/
+    .reduce(function (s, frag) {
+        if (frag) {
+        return s + new XMLSerializer().serializeToString(frag) + ';';
+        } else {return s;}
+    }, '')
+    //*/
     // .outerHTML
 );
 // alert(new XMLSerializer().serializeToString(document.body));

@@ -88,7 +88,7 @@ function htmlStringify (items) {
     }
 }
 
-function searchPositions (str, regex, returnLen) {
+function searchPositions (str, regex, returnEnd) {
     var ret = [];
     var offset = 0;
     var found, len, inc, idx;
@@ -99,7 +99,7 @@ function searchPositions (str, regex, returnLen) {
         }
         len = str.match(regex)[0].length;
         idx = offset + found;
-        ret.push(returnLen ? [idx, len] : idx);
+        ret.push(returnEnd ? [idx, len + idx] : idx);
         inc = found + len;
         offset += inc;
         str = str.slice(inc);
@@ -515,8 +515,8 @@ function matchUnbounded (regex, node, opts) {
             var startNode, startIdx;
 
             return indexes.map(function (idxObj) {
-                var start = idxObj[0] - ct;
-                var end = idxObj[1] - start;
+                var start = idxObj[0];
+                var end = idxObj[1];
                 var startFound = false;
                 var found;
 
@@ -533,18 +533,19 @@ function matchUnbounded (regex, node, opts) {
                             var contents = node.nodeValue;
                             var len = contents.length;
                             var endTextNode = ct + len;
+                            var justRan = false;
                             if (!startFound && (endTextNode > start)) {
                                 startNode = node;
-                                startIdx = endTextNode - start;
-                                ct += start;
+                                startIdx = start - ct;
                                 startFound = true;
+                                justRan = true;
                             }
-                            if (startFound && (endTextNode <= end)) {
-                                var endIdx = end - endTextNode;
-
+                            if (startFound && (endTextNode > end)) {
+                                var endIdx = end - ct;
                                 found = document.createRange();
                                 found.setStart(startNode, startIdx);
                                 found.setEnd(node, endIdx);
+                                ct += endIdx;
                                 startFound = false;
                                 return true;
                             }
