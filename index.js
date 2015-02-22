@@ -548,6 +548,11 @@ function matchUnbounded (regex, node, opts) {
                             startFound = false;
                             ++idx;
                             switch (opts.returnType) {
+                                case 'html':
+                                    var dummy = document.createElement('div');
+                                    dummy.appendChild(found.cloneContents());
+                                    ret.push(dummy.innerHTML);
+                                    break;
                                 case 'range':
                                     ret.push(found);
                                     break;
@@ -555,13 +560,15 @@ function matchUnbounded (regex, node, opts) {
                                     ret.push(found.cloneContents());
                                     break;
                             }
-                            if (indexes[idx]) {
+                            var moreIndexes = indexes[idx];
+                            if (moreIndexes) {
                                 start = indexes[idx][0];
                                 end = indexes[idx][1];
+                                return this.text(textNode);
                             }
-                            return !indexes[idx];
+                            return true;
                         }
-                        ct += contents.length;
+                        ct += len;
                         return false;
                     }
                 }));
