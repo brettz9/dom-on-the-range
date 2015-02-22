@@ -52,7 +52,7 @@ alert( // document.body.appendChild(
     .reduce(function (s, frag) {
         if (frag) {
         return s + new XMLSerializer().serializeToString(frag) + ';';
-        } else {return s;}
+        } else {return s+'(empty)';}
     }, '')
     //*/
     // .outerHTML

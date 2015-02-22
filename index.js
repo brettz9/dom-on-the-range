@@ -511,60 +511,63 @@ function matchUnbounded (regex, node, opts) {
             if (!indexes.length) {
                 return null;
             }
+            var found, startNode, startIdx;
+            var startFound = false;
             var ct = 0;
-            var startNode, startIdx;
+            var idx = 0;
+            var start = indexes[idx][0];
+            var end = indexes[idx][1];
+            var ret = [];
 
-            return indexes.map(function (idxObj) {
-                var start = idxObj[0];
-                var end = idxObj[1];
-                var startFound = false;
-                var found;
+            var findInnerMatches = function findInnerMatches (regex, searchNode) {
+                function findMatches (aNode) {
+                    return findInnerMatches(regex, aNode);
+                }
 
-                var findInnerMatches = function findInnerMatches (regex, node) {
-                    function findMatches (node) {
-                        return findInnerMatches(regex, node);
-                    }
-
-                    handleNode(node, nodeHandlerBoilerplate({
-                        element: function (node) {
-                            return Array.from(node.childNodes).some(findMatches);
-                        },
-                        text: function (node) {
-                            var contents = node.nodeValue;
-                            var len = contents.length;
-                            var endTextNode = ct + len;
-                            var justRan = false;
-                            if (!startFound && (endTextNode > start)) {
-                                startNode = node;
-                                startIdx = start - ct;
-                                startFound = true;
-                                justRan = true;
-                            }
-                            if (startFound && (endTextNode > end)) {
-                                var endIdx = end - ct;
-                                found = document.createRange();
-                                found.setStart(startNode, startIdx);
-                                found.setEnd(node, endIdx);
-                                ct += endIdx;
-                                startFound = false;
-                                return true;
-                            }
-                            ct += contents.length;
-                            return false;
+                return handleNode(searchNode, nodeHandlerBoilerplate({
+                    element: function (aNode) {
+                        return Array.from(aNode.childNodes).some(findMatches);
+                    },
+                    text: function (textNode) {
+                        var contents = textNode.nodeValue;
+                        var len = contents.length;
+                        var endTextNode = ct + len;
+                        var justRan = false;
+                        if (!startFound && (endTextNode > start)) {
+                            startNode = textNode;
+                            startIdx = start - ct;
+                            startFound = true;
+                            justRan = true;
                         }
-                    }));
-                    if (!found) {
-                        return null;
+                        if (startFound && (endTextNode > end)) {
+                            var endIdx = end - ct;
+                            found = document.createRange();
+                            found.setStart(startNode, startIdx);
+                            found.setEnd(textNode, endIdx);
+                            ct += endIdx;
+                            startFound = false;
+                            ++idx;
+                            switch (opts.returnType) {
+                                case 'range':
+                                    ret.push(found);
+                                    break;
+                                case 'fragment': default:
+                                    ret.push(found.cloneContents());
+                                    break;
+                            }
+                            if (indexes[idx]) {
+                                start = indexes[idx][0];
+                                end = indexes[idx][1];
+                            }
+                            return !indexes[idx];
+                        }
+                        ct += contents.length;
+                        return false;
                     }
-                    switch (opts.returnType) {
-                        case 'range':
-                            return found;
-                        case 'fragment': default:
-                            return found.cloneContents();
-                    }
-                };
-                return findInnerMatches(regex, node);
-            });
+                }));
+            };
+            findInnerMatches(regex, node);
+            return ret.length ? ret : null;
     }
 }
 
