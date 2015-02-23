@@ -701,11 +701,17 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     }
     matchedRanges.forEach(function (range) {
         var frag = range.cloneContents();
-        
-        // Todo: Fix this so that it always uses textContent, but replaces params in string replacementNode's (first implement execUnbounded?)
-        var text = replacePatternsHTML ? getFragmentHTML(frag) : frag.textContent;
-
-        replaceNode(regex, text, node, replacementNode, range, opts);
+        if (replacePatternsHTML && typeof replacementNode === 'string') {
+            // We need to handle replacements ourselves
+            var replacements = execUnbounded(regex, node, Object.assign({}, opts, {returnType: 'html'}));
+            replacementNode = replacementNode.replace(/\$&/g, replacements[0]);
+            replacements.slice(1).forEach(function (replacement, i) {
+                replacementNode = replacementNode.replace(new RegExp('\\$' + (i + 1), 'g'), replacement);
+            });
+            // Todo: deal with $` and $' (preceding, following)
+            opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
+        }
+        replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
     });
     return node;
 }
