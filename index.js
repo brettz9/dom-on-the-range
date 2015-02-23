@@ -224,7 +224,7 @@ function splitBounded (regex, node, opts) {
                 range.setEnd(node, matchStart);
 
                 var pre = range.extractContents();
-                var r = [pre, node];
+                var r = [(opts.returnType === 'range' ? range : pre), node];
                 r.text = true;
                 return r;
             }
@@ -237,7 +237,7 @@ function splitBounded (regex, node, opts) {
                 return htmlStringify(ret);
             case 'text':
                 return textStringify(ret);
-            case 'dom':
+            case 'fragment': case 'range':
                 return ret;
         }
     }
@@ -597,6 +597,11 @@ function matchUnbounded (regex, node, opts) {
                                     var dummy = document.createElement('div');
                                     dummy.appendChild(found.cloneContents());
                                     ret.push(dummy.innerHTML);
+                                    break;
+                                case 'text':
+                                    var dummy = document.createElement('div');
+                                    dummy.appendChild(found.cloneContents());
+                                    ret.push(dummy.textContent);
                                     break;
                                 case 'range':
                                     ret.push(found);
