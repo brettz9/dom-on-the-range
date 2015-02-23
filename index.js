@@ -686,12 +686,14 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     replacementNode = getNode(opts.replacement || replacementNode);
     
     if (regex.global) {
+        var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'}));
+        matchedRanges.forEach(function (matchedRange) {
+            
+        });
+    }
+    else { // Todo: Implement execUnbounded
         
     }
-    var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'}));
-    matchedRanges.forEach(function (matchedRange) {
-        
-    });
 }
 
 /**
