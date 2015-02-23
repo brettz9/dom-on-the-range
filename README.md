@@ -17,7 +17,7 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. Add preceding/following options to `matchBounded`, `execBounded`, `execUnbounded`
+1. Add preceding/following options to `matchBounded`, `execBounded`
 1. As already done for `matchUnbounded` and `replaceUnbounded`, get `splitUnbounded`, `execUnbounded` to work
 across text nodes and element nodes as per
 http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a-dom-range
