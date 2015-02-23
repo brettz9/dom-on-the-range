@@ -31,10 +31,10 @@ newThis::es::0::test
 newThis::eS::1::teSt
 newThis::es::2::test
 */
-
+var x;
 alert( // document.body.appendChild(
     // JSON.stringify
-    (
+    (x = 
         // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
         // DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["teSt"]], [["test"]]  ]
@@ -46,9 +46,10 @@ alert( // document.body.appendChild(
         // DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
         
         // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
-        DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'fragment'}) // [  ["test"], [["teSt"]], [["test"]]  ]
+        // DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'range'}) //
+        DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true, replacePatternsHTML: true})
     )
-    /**/
+    /**
     .reduce(function (s, frag) {
         if (frag) {
         return s + new XMLSerializer().serializeToString(frag) + ';';
