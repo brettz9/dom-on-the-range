@@ -699,6 +699,8 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'})) || [];
     matchedRanges.every(function (range) {
         var frag = range.cloneContents();
+        
+        // Todo: Fix this so that it always uses textContent, but replaces params in string replacementNode's (first implement execUnbounded?)
         var text = replacePatternsHTML ? getFragmentHTML(frag) : frag.textContent;
 
         replaceNode(regex, text, node, replacementNode, range, opts);
