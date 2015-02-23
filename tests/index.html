@@ -47,7 +47,7 @@ alert( // document.body.appendChild(
         
         // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
         // DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'range'}) //
-        DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {replacement: '<u>DONE$1EE</u>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true, replacePatternsHTML: false, portionMode: 'single'})
+        DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {replacement: '<u>DONE$1EE</u>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true, replacePatternsHTML: false, portionMode: 'multiple'})
     )
     /**
     .reduce(function (s, frag) {

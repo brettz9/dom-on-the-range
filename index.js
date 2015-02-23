@@ -778,11 +778,20 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
                             return Array.from(node.childNodes)[method](replaceMatches);
                         },
                         text: function (node) {
+                            var contents = node.nodeValue;
                             if (replacePortionPattern) {
                                 // We need to handle whole portion replacements here ourselves
                                 replacementNode = replacementNode.replace(/\$0/g, node.nodeValue);
                             }
-                            replaceNode(/^[\s\S]*$/, node.nodeValue, node, replacementNode, range, opts);
+                            var textRange = range.cloneRange();
+                            
+                            /*
+                            // Todo: Figure out why setStart/setEnd is not working here
+                            textRange.setStart(node, 0);
+                            textRange.setEnd(node, contents.length);
+                            */
+                            
+                            replaceNode(/^[\s\S]*$/, contents, node, replacementNode, textRange, opts);
                             return true;
                         }
                     }));
