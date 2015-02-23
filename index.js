@@ -400,7 +400,7 @@ function execBounded (regex, node, opts) {
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
     var ret = [];
-    if (all) { // Modify supplied RegExp (its lastIndex) if not returning all
+    if (all) { // We will modify the supplied RegExp (its lastIndex) if not returning all
         regex = globalCloneRegex(regex);
     }
     regex.lastCumulativeIndex = regex.lastCumulativeIndex || 0;
@@ -454,7 +454,7 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var execArr;
-                    regex.lastIndex = 0;
+                    regex.lastIndex = 0; // Required for global, harmless for non-global
                     while ((execArr = regex.exec(contents)) !== null) {
                         cumulativeIndex += regex.lastIndex;
                         if (cumulativeIndex > oldLastCumulativeIndex) {
@@ -541,6 +541,8 @@ function matchBounded (regex, node, opts) {
 function matchUnbounded (regex, node, opts) {
     regex = getRegex(regex);
     opts = opts || {};
+    var preceding = opts.preceding;
+    var following = opts.following;
     if (!regex.global) {
         return execUnbounded(regex, node, opts);
     }
@@ -592,24 +594,38 @@ function matchUnbounded (regex, node, opts) {
                             found.setEnd(textNode, endIdx);
                             startFound = false;
                             ++idx;
+                            var element, dummy;
                             switch (opts.returnType) {
                                 case 'html':
-                                    var dummy = document.createElement('div');
+                                    dummy = document.createElement('div');
                                     dummy.appendChild(found.cloneContents());
-                                    ret.push(dummy.innerHTML);
+                                    element = dummy.innerHTML;
                                     break;
                                 case 'text':
-                                    var dummy = document.createElement('div');
+                                    dummy = document.createElement('div');
                                     dummy.appendChild(found.cloneContents());
-                                    ret.push(dummy.textContent);
+                                    element = dummy.textContent;
                                     break;
                                 case 'range':
-                                    ret.push(found);
+                                    element = found;
                                     break;
                                 case 'fragment': default:
-                                    ret.push(found.cloneContents());
+                                    element = found.cloneContents();
                                     break;
                             }
+                            if (element && typeof element === 'object') {
+                                /*
+                                Todo: Use startNode, textNode, node
+                                Todo: Utilize exact preceding/following values for their return type (e.g., preceding:'html')
+                                if (preceding) {
+                                    element.preceding = ;
+                                }
+                                if (following) {
+                                    element.following = ;
+                                }
+                                */
+                            }
+                            ret.push(element);
                             var moreIndexes = indexes[idx];
                             if (moreIndexes) {
                                 start = indexes[idx][0];
@@ -700,7 +716,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     var replacePatternsHTML = opts.replacePatternsHTML; // boolean
     replacementNode = opts.replacement || replacementNode;
     
-    var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'})) || [];
+    var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range', preceding: 'html', following: 'html'})) || [];
     if (!regex.global) {
         matchedRanges = matchedRanges.splice(0, 1);
     }
@@ -713,7 +729,8 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
             replacements.slice(1).forEach(function (replacement, i) {
                 replacementNode = replacementNode.replace(new RegExp('\\$' + (i + 1), 'g'), replacement);
             });
-            // Todo: deal with (non-recursive) $` and $' (preceding, following)
+            replacementNode = replacementNode.replace(/\$`/g, range.preceding);
+            replacementNode = replacementNode.replace(/\$'/g, range.following);
             opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
         }
         replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
