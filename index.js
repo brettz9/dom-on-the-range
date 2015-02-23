@@ -543,6 +543,7 @@ function matchUnbounded (regex, node, opts) {
     opts = opts || {};
     var preceding = opts.preceding;
     var following = opts.following;
+    var addPrecedingFollowing = (preceding || following) && ['range', 'fragment'].indexOf(opts.returnType) > -1;
     if (!regex.global) {
         return execUnbounded(regex, node, opts);
     }
@@ -613,7 +614,7 @@ function matchUnbounded (regex, node, opts) {
                                     element = found.cloneContents();
                                     break;
                             }
-                            if (element && typeof element === 'object') {
+                            if (addPrecedingFollowing) {
                                 /*
                                 Todo: Use startNode, textNode, node
                                 Todo: Utilize exact preceding/following values for their return type (e.g., preceding:'html')
