@@ -18,7 +18,7 @@ Currently for the browser only due to there apparently being no Range implementa
 # Todos
 
 1. For `replaceUnbounded`, support `portionMode` (retain|first) as in findAndReplaceDOMText and separate replacement option.
-1. Support callback replacer for replace functions (in place of `replacementNode`), returning node or string to replace.
+1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for portion (and index of portion among portions) and whole match and to return node or string for replacement.
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for match and exec (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
@@ -40,3 +40,4 @@ http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a
 1. Allow regexes like `<a/>.*<b/>` which do not match the elements literally but instead look merely for an element with the name "a" and find it and all content until an element with the name "b". Attributes indicated within (with or without values?) can be configured to be either a comprehensive and exclusive list of required attributes or just indicating the minimum set. `&lt;` and `&gt;` can be used within the regex for `<` and `>`.
 1. Add `filterTextNodes`, etc. as with `filterElements`?
 1. Add `filterElements` for test and search methods and for `searchType` "text" with matchUnbounded?
+1. Support `revert` as in findAndReplaceDOMText.
