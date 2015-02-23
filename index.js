@@ -181,7 +181,8 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
 */
 function splitBounded (regex, node, opts) {
     var range = document.createRange();
-    
+    opts = opts || {};
+    var filterElements = opts.filterElements;
     regex = getSplitSafeRegex(regex);
 
     node = node.cloneNode(true);
@@ -204,6 +205,9 @@ function splitBounded (regex, node, opts) {
 
         return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
+                if (filterElements && filterElements(node) === false) {
+                    return false;
+                }
                 return Array.from(node.childNodes).reduce(cloneFoundMatches, []);
             },
             text: function (node) {
@@ -399,6 +403,7 @@ function execBounded (regex, node, opts) {
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
     var all = opts.hasOwnProperty('all') ? opts.all : false;
+    var filterElements = opts.filterElements;
     var ret = [];
     if (all) { // We will modify the supplied RegExp (its lastIndex) if not returning all
         regex = globalCloneRegex(regex);
@@ -448,6 +453,9 @@ function execBounded (regex, node, opts) {
             }
             return handleNode(node, result, nodeHandlerBoilerplate({
                 element: function (node, result) {
+                    if (filterElements && filterElements(node) === false) {
+                        return false;
+                    }
                     Array.from(node.childNodes).some(findMatches);
                     return result.found;
                 },
@@ -505,6 +513,7 @@ function matchBounded (regex, node, opts) {
     regex = getRegex(regex);
     opts = opts || {};
     var flatten = opts.hasOwnProperty('flatten') ? opts.flatten : true;
+    var filterElements = opts.filterElements;
 
     if (!regex.global) {
         return execBounded(regex, node, opts);
@@ -526,6 +535,9 @@ function matchBounded (regex, node, opts) {
 
         return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
+                if (filterElements && filterElements(node) === false) {
+                    return false;
+                }
                 return Array.from(node.childNodes).reduce(findMatches, []);
             },
             text: function (node) {
@@ -543,6 +555,7 @@ function matchUnbounded (regex, node, opts) {
     opts = opts || {};
     var preceding = opts.preceding;
     var following = opts.following;
+    var filterElements = opts.filterElements;
     var addPrecedingFollowing = (preceding || following) && ['range', 'fragment'].indexOf(opts.returnType) > -1;
     if (!regex.global) {
         return execUnbounded(regex, node, opts);
@@ -577,6 +590,9 @@ function matchUnbounded (regex, node, opts) {
 
                 return handleNode(searchNode, nodeHandlerBoilerplate({
                     element: function (aNode) {
+                        if (filterElements && filterElements(aNode) === false) {
+                            return false;
+                        }
                         return Array.from(aNode.childNodes).some(findMatches);
                     },
                     text: function (textNode) {
@@ -660,6 +676,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
     var range = document.createRange();
     regex = getRegex(regex);
     opts = opts || {};
+    var filterElements = opts.filterElements;
     if (!opts.replaceNode) {
         node = getNode(node).cloneNode(true);
     }
@@ -672,6 +689,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
 
         return handleNode(node, nodeHandlerBoilerplate({
             element: function (node) {
+                if (filterElements && filterElements(node) === false) {
+                    return false;
+                }
                 return Array.from(node.childNodes)[method](replaceMatches);
             },
             text: function (node) {
