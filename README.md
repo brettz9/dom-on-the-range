@@ -17,8 +17,9 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. As already done for matchUnbounded, get unbounded to work
-(across text nodes and element nodes) as per
+1. As already done for `matchUnbounded`, get unbounded to work
+across text nodes and element nodes (including fixing
+`replaceUnbounded` to use `execUnbounded` for replacement patterns), as per
 http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a-dom-range
 1. Try making bounded functions dependencies of matchBounded?
 1. Allow returning of ranges or nodes for match and exec (as well as strings).
