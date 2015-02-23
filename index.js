@@ -594,9 +594,9 @@ function replaceBounded (regex, node, opts, replacementNode) {
     var replacePatterns = opts.replacePatterns; // true, false
     var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
     if (!opts.replaceNode) {
-        node = node.cloneNode(true);
+        node = getNode(node).cloneNode(true);
     }
-    replacementNode = opts.replacement || replacementNode;
+    replacementNode = getNode(opts.replacement || replacementNode);
     var method = regex.global ? 'forEach' : 'some';
     function replaceInnerMatches (regex, node) {
         function replaceMatches (node) {
@@ -676,8 +676,15 @@ function replaceBounded (regex, node, opts, replacementNode) {
 */
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
+    opts = opts || {};
+    var replaceFormat = opts.replaceFormat; // "text", "html"
+    var replacePatterns = opts.replacePatterns; // true, false
+    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
+    if (!opts.replaceNode) {
+        node = getNode(node).cloneNode(true);
+    }
+    replacementNode = getNode(opts.replacement || replacementNode);
     
-    replacementNode = getNode(replacementNode);
     if (regex.global) {
         
     }
