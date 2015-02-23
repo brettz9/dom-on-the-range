@@ -686,7 +686,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     replacementNode = getNode(opts.replacement || replacementNode);
     var regexGlobalState = regex.global;
     
-    var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'}));
+    var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'})) || [];
     matchedRanges.every(function (matchedRange) {
         
         return regexGlobalState;
