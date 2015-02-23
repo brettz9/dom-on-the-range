@@ -153,8 +153,11 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
         newNode = wrapper;
     }
 
-    range.deleteContents();
-    range.insertNode(newNode);
+    if (range) {
+        range.deleteContents();
+        range.insertNode(newNode);
+    }
+    return newNode;
 }
 
 /**
@@ -783,20 +786,16 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
                                 // We need to handle whole portion replacements here ourselves
                                 replacementNode = replacementNode.replace(/\$0/g, node.nodeValue);
                             }
-                            var textRange = range.cloneRange();
-                            
-                            /*
-                            // Todo: Figure out why setStart/setEnd is not working here
-                            textRange.setStart(node, 0);
-                            textRange.setEnd(node, contents.length);
-                            */
-                            
-                            replaceNode(/^[\s\S]*$/, contents, node, replacementNode, textRange, opts);
+                            // Todo: any way to operate on original DOM with new range and thus no need to call deleteContents/insertNode below (or to replaceChild)? Apparently not as range.commonAncestorContainer would get too much
+                            var newNode = replaceNode(/^[\s\S]*$/, contents, node, replacementNode, false, opts);
+                            node.parentNode.replaceChild(newNode, node);
                             return true;
                         }
                     }));
                 }
                 replaceInnerMatches(regex, frag);
+                range.deleteContents();
+                range.insertNode(frag);
             });
             break;
     }
