@@ -44,6 +44,12 @@ function escapeRegexReplace (str) {
     return str.replace(/\$/g, '$$$$');
 }
 
+function getFragmentHTML (frag) {
+    var clone = document.createElement('div');
+    clone.appendChild(frag.cloneNode(true));
+    return clone.innerHTML;
+}
+
 function textStringify (items) {
     if (Array.isArray(items)) {
         return items.map(function (node) {
@@ -79,9 +85,7 @@ function htmlStringify (items) {
             case 3:
                 return items.nodeValue;
             case 11:
-                var div = document.createElement('div');
-                div.appendChild(items.cloneNode(true));
-                return div.innerHTML;
+                return getFragmentHTML(items);
             default:
                 throw 'Unexpected node type';
         }
@@ -691,11 +695,6 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     replacementNode = opts.replacement || replacementNode;
     var regexGlobalState = regex.global;
     
-    function getFragmentHTML (frag) {
-        var clone = document.createElement('div');
-        clone.appendChild(frag.cloneNode(true));
-        return clone.innerHTML;
-    }
     var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'})) || [];
     matchedRanges.every(function (range) {
         var frag = range.cloneContents();
