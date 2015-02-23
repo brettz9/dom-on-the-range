@@ -788,7 +788,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
                         }
                     }));
                 }
-                replaceInnerMatches(regex, node);
+                replaceInnerMatches(regex, frag);
             });
             break;
     }
