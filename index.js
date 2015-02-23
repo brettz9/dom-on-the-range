@@ -720,6 +720,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     if (!regex.global) {
         matchedRanges = matchedRanges.splice(0, 1);
     }
+    // Todo: avoid redundancy here with repeated replacements!
     matchedRanges.forEach(function (range) {
         var frag = range.cloneContents();
         if (replacePatternsHTML && typeof replacementNode === 'string') {

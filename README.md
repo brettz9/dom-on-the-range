@@ -24,6 +24,7 @@ http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a
     1. Use `execUnbounded` for replacement patterns
     1. Test `replaceUnbounded` with non-global which uses matchUnbounded->execUnbounded)
     1. Implement preceding/following replacements (e.g., `$'`)
+1. Add preceding/following options to `matchBounded`, `execBounded`, `execUnbounded`
 1. Try making bounded functions dependencies of matchBounded?
 1. Allow returning of ranges or nodes for match and exec (as well as strings).
 1. Could allow config for `search` to return index of matched text within `outerHTML` or `XMLSerializer().serializeToString()` (and on index properties of `exec` return results). Could allow provision of strings (but then would need to add a HTML parser dependency)
