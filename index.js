@@ -109,6 +109,49 @@ function searchPositions (str, regex, returnEnd) {
 
 // Todo all of the below (node-bounded and node-unbounded versions)!
 
+function replaceNode (regex, text, node, replacementNode, range, opts) {
+    var r, newNode, clone, wrapper;
+    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
+    var replaceFormat = opts.replaceFormat; // "text", "html"
+    var replacePatterns = opts.replacePatterns; // true, false
+    
+    switch (typeof replacementNode) {
+    case 'string':
+        newNode = text.replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
+        switch (replaceFormat) {
+            case 'html':
+                r = document.createRange();
+                r.selectNodeContents(node);
+                newNode = r.createContextualFragment(newNode);
+                break;
+            case 'text': default:
+                newNode = getNode(newNode);
+                break;
+        }
+        break;
+    case 'function':
+        newNode = text.replace(regex, replacementNode);
+        break;
+    default:
+        newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
+        break;
+    }
+    if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
+        if (wrap.nodeType) {
+            clone = document.createElement('div');
+            clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
+            wrapper = clone.firstChild;
+        }
+        else {
+            wrapper = document.createElement(wrap); // We might instead set "wrap" to the result and let it be used as an object in the next loop
+        }
+        wrapper.appendChild(newNode);
+        newNode = wrapper;
+    }
+
+    range.deleteContents();
+    range.insertNode(newNode);
+}
 
 /**
 * @param {Node} node The node out of which to split
@@ -677,18 +720,24 @@ function replaceBounded (regex, node, opts, replacementNode) {
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
     opts = opts || {};
-    var replaceFormat = opts.replaceFormat; // "text", "html"
-    var replacePatterns = opts.replacePatterns; // true, false
-    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
     if (!opts.replaceNode) {
         node = getNode(node).cloneNode(true);
     }
+    var replacePatternsHTML = opts.replacePatternsHTML; // boolean
     replacementNode = getNode(opts.replacement || replacementNode);
     var regexGlobalState = regex.global;
     
+    function getFragmentHTML (frag) {
+        var clone = document.createElement('div');
+        clone.appendChild(frag.cloneNode(true));
+        return clone.innerHTML;
+    }
     var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'})) || [];
-    matchedRanges.every(function (matchedRange) {
-        
+    matchedRanges.every(function (range) {
+        var frag = range.cloneContents();
+        var text = replacePatternsHTML ? getFragmentHTML(frag) : frag.textContent;
+
+        replaceNode(regex, text, node, replacementNode, range, opts);
         return regexGlobalState;
     });
     return node;
