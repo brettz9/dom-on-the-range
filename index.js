@@ -720,20 +720,19 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     if (!regex.global) {
         matchedRanges = matchedRanges.splice(0, 1);
     }
-    // Todo: avoid redundancy here with repeated replacements!
+    if (matchedRanges.length && replacePatternsHTML && typeof replacementNode === 'string') {
+        // We need to handle replacements ourselves
+        var replacements = execUnbounded(regex, node, Object.assign({}, opts, {returnType: 'html'}));
+        replacementNode = replacementNode.replace(/\$&/g, replacements[0]);
+        replacements.slice(1).forEach(function (replacement, i) {
+            replacementNode = replacementNode.replace(new RegExp('\\$' + (i + 1), 'g'), replacement);
+        });
+        replacementNode = replacementNode.replace(/\$`/g, range.preceding);
+        replacementNode = replacementNode.replace(/\$'/g, range.following);
+        opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
+    }
     matchedRanges.forEach(function (range) {
         var frag = range.cloneContents();
-        if (replacePatternsHTML && typeof replacementNode === 'string') {
-            // We need to handle replacements ourselves
-            var replacements = execUnbounded(regex, node, Object.assign({}, opts, {returnType: 'html'}));
-            replacementNode = replacementNode.replace(/\$&/g, replacements[0]);
-            replacements.slice(1).forEach(function (replacement, i) {
-                replacementNode = replacementNode.replace(new RegExp('\\$' + (i + 1), 'g'), replacement);
-            });
-            replacementNode = replacementNode.replace(/\$`/g, range.preceding);
-            replacementNode = replacementNode.replace(/\$'/g, range.following);
-            opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
-        }
         replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
     });
     return node;
