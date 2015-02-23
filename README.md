@@ -17,10 +17,9 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. For `replaceUnbounded`, support `portionMode` (retain|first) as in findAndReplaceDOMText and separate replacement option.
 1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for portion (and index of portion among portions) and whole match and to return node or string for replacement.
 1. Allow returning node array as a single joined DOM fragment or string.
-1. Allow returning of ranges or nodes for match and exec (as well as strings).
+1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
 
 1. Add preceding/following options to `matchBounded`, `execBounded`, `matchUnbounded`.
@@ -32,6 +31,7 @@ http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a
 1. Once `execUnbounded` implemented:
     1. For `replaceUnbounded`, test with non-global which uses matchUnbounded->execUnbounded.
     1. For `replaceUnbounded`, test replacement patterns, including preceding/following replacements (e.g., `$'`).
+    1. For `replaceUnbounded`, test `portionMode`'s (multiple|single|first) and separate replacement option.
     1. Test `forEachUnbounded`.
 
 # Possible todos

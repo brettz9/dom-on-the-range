@@ -736,6 +736,8 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     }
     var replacePatternsHTML = opts.replacePatternsHTML; // boolean
     replacementNode = opts.replacement || replacementNode;
+    var portionMode = opts.portionMode || 'multiple'; // multiple|first|single
+    var replacePortionPattern = opts.replacePortionPattern; // boolean
     
     var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range', preceding: 'html', following: 'html'})) || [];
     if (!regex.global) {
@@ -752,10 +754,44 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
         replacementNode = replacementNode.replace(/\$'/g, range.following);
         opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
     }
-    matchedRanges.forEach(function (range) {
-        var frag = range.cloneContents();
-        replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
-    });
+    var method;
+    switch (portionMode) {
+        case 'single':
+            matchedRanges.forEach(function (range) {
+                var frag = range.cloneContents();
+                replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
+            });
+            break;
+        case 'first':
+            method = 'some';
+            // Fall-through
+        case 'multiple': default:
+            method = method || 'forEach';
+            matchedRanges.forEach(function (range) {
+                var frag = range.cloneContents();
+                
+                function replaceInnerMatches (regex, node) {
+                    function replaceMatches (node) {
+                        return replaceInnerMatches(regex, node);
+                    }
+                    return handleNode(node, nodeHandlerBoilerplate({
+                        element: function (node) {
+                            return Array.from(node.childNodes)[method](replaceMatches);
+                        },
+                        text: function (node) {
+                            if (replacePortionPattern) {
+                                // We need to handle whole portion replacements here ourselves
+                                replacementNode = replacementNode.replace(/\$0/g, node.nodeValue);
+                            }
+                            replaceNode(/^[\s\S]*$/, node.nodeValue, node, replacementNode, range, opts);
+                            return true;
+                        }
+                    }));
+                }
+                replaceInnerMatches(regex, node);
+            });
+            break;
+    }
     return node;
 }
 
