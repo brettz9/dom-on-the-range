@@ -22,7 +22,7 @@ Currently for the browser only due to there apparently being no Range implementa
 1. Try making bounded functions dependencies of matchBounded?
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
 1. Allow returning node array as a single joined DOM fragment or string.
-1. For `replaceUnbounded`, support `portionMode` (retain|first) as in findAndReplaceDOMText
+1. For `replaceUnbounded`, support `portionMode` (retain|first) as in findAndReplaceDOMText and separate replacement option
 1. Support `filterElements` function (returning boolean on whether to keep) as in findAndReplaceDOMText
 
 1. Get `splitUnbounded`, `execUnbounded` (as already done for `matchUnbounded` and `replaceUnbounded`) to work
