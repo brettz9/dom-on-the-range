@@ -633,13 +633,10 @@ function replaceBounded (regex, node, opts, replacementNode) {
     var range = document.createRange();
     regex = getRegex(regex);
     opts = opts || {};
-    var replaceFormat = opts.replaceFormat; // "text", "html"
-    var replacePatterns = opts.replacePatterns; // true, false
-    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
     if (!opts.replaceNode) {
         node = getNode(node).cloneNode(true);
     }
-    replacementNode = getNode(opts.replacement || replacementNode);
+    replacementNode = opts.replacement || replacementNode;
     var method = regex.global ? 'forEach' : 'some';
     function replaceInnerMatches (regex, node) {
         function replaceMatches (node) {
@@ -654,53 +651,20 @@ function replaceBounded (regex, node, opts, replacementNode) {
                 var contents = node.nodeValue;
                 regex.lastIndex = 0;
 
-                var textMatch, newNode, matchStart, clone, matchEnd, r, found = false;
-                var len, wrapper;
+                var textMatch, matchStart, matchEnd, found = false;
+                var len, text;
                 while ((textMatch = regex.exec(contents)) !== null) {
                     found = true;
-                    len = textMatch[0].length;
+                    text = textMatch[0];
+                    len = text.length;
                     matchStart = regex.global ? regex.lastIndex - len : contents.search(regex); // non-global can't use lastIndex
                     matchEnd = matchStart + len;
-
-                    switch (typeof replacementNode) {
-                    case 'string':
-                        newNode = textMatch[0].replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
-                        switch (replaceFormat) {
-                            case 'html':
-                                r = document.createRange();
-                                r.selectNodeContents(node);
-                                newNode = r.createContextualFragment(newNode);
-                                break;
-                            case 'text': default:
-                                newNode = getNode(newNode);
-                                break;
-                        }
-                        break;
-                    case 'function':
-                        newNode = textMatch[0].replace(regex, replacementNode);
-                        break;
-                    default:
-                        newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
-                        break;
-                    }
-                    if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
-                        if (wrap.nodeType) {
-                            clone = document.createElement('div');
-                            clone.innerHTML = wrap.outerHTML || new XMLSerializer().serializeToString(wrap);
-                            wrapper = clone.firstChild;
-                        }
-                        else {
-                            wrapper = document.createElement(wrap); // We might instead set "wrap" to the result and let it be used as an object in the next loop
-                        }
-                        wrapper.appendChild(newNode);
-                        newNode = wrapper;
-                    }
 
                     range.setStart(node, matchStart);
                     range.setEnd(node, matchEnd);
 
-                    range.deleteContents();
-                    range.insertNode(newNode);
+                    replaceNode(regex, text, node, replacementNode, range, opts);
+                    
                     if (!regex.global) {
                         break;
                     }
@@ -724,7 +688,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
         node = getNode(node).cloneNode(true);
     }
     var replacePatternsHTML = opts.replacePatternsHTML; // boolean
-    replacementNode = getNode(opts.replacement || replacementNode);
+    replacementNode = opts.replacement || replacementNode;
     var regexGlobalState = regex.global;
     
     function getFragmentHTML (frag) {
