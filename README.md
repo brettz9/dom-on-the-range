@@ -17,6 +17,7 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
+1. Option for "single" `portionMode` to only operate when it does not overlap with closing element node
 1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for portion (and index of portion among portions) and whole match and to return node or string for replacement.
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
