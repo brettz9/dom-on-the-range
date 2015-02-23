@@ -17,14 +17,14 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. As already done for `matchUnbounded` and `replaceUnbounded`, get `execUnbounded`, `splitUnbounded` to work
+1. Add preceding/following options to `matchBounded`, `execBounded`, `execUnbounded`
+1. As already done for `matchUnbounded` and `replaceUnbounded`, get `splitUnbounded`, `execUnbounded` to work
 across text nodes and element nodes as per
 http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a-dom-range
 1. Once `execUnbounded` implemented:
     1. For `replaceUnbounded`, test with non-global which uses matchUnbounded->execUnbounded
     1. For `replaceUnbounded`, test replacement patterns, including preceding/following replacements (e.g., `$'`)
     1. Test `forEachUnbounded`
-1. Add preceding/following options to `matchBounded`, `execBounded`, `execUnbounded`
 1. Try making bounded functions dependencies of matchBounded?
 1. Allow returning of ranges or nodes for match and exec (as well as strings).
 1. Could allow config for `search` to return index of matched text within `outerHTML` or `XMLSerializer().serializeToString()` (and on index properties of `exec` return results). Could allow provision of strings (but then would need to add a HTML parser dependency)
