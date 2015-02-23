@@ -250,6 +250,7 @@ function splitUnbounded (regex, node, opts) {
     regex = getSplitSafeRegex(regex);
     
     // Todo
+    
 }
 
 function split (regex, node, opts, nodeBounded) {
@@ -693,17 +694,18 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     }
     var replacePatternsHTML = opts.replacePatternsHTML; // boolean
     replacementNode = opts.replacement || replacementNode;
-    var regexGlobalState = regex.global;
     
-    var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'})) || [];
-    matchedRanges.every(function (range) {
+    var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'})) || [];
+    if (!regex.global) {
+        matchedRanges = matchedRanges.splice(0, 1);
+    }
+    matchedRanges.forEach(function (range) {
         var frag = range.cloneContents();
         
         // Todo: Fix this so that it always uses textContent, but replaces params in string replacementNode's (first implement execUnbounded?)
         var text = replacePatternsHTML ? getFragmentHTML(frag) : frag.textContent;
 
         replaceNode(regex, text, node, replacementNode, range, opts);
-        return regexGlobalState;
     });
     return node;
 }
