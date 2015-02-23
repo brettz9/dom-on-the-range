@@ -757,7 +757,6 @@ function forEachBounded (regex, node, cb, thisObj) {
     
     var matches, n0, i = 0;
     thisObj = thisObj || null;
-    // Todo: Fix this for our exec!
     while ((matches = execBounded(regex, node)) !== null) {
         n0 = matches.splice(0, 1);
         cb.apply(thisObj, matches.concat(i++, n0));
@@ -766,7 +765,13 @@ function forEachBounded (regex, node, cb, thisObj) {
 
 function forEachUnbounded (regex, node, cb, thisObj) {
     regex = getRegex(regex);
-    
+
+    var matches, n0, i = 0;
+    thisObj = thisObj || null;
+    while ((matches = execUnbounded(regex, node)) !== null) {
+        n0 = matches.splice(0, 1);
+        cb.apply(thisObj, matches.concat(i++, n0));
+    }
 }
 
 function forEach (regex, node, cb, thisObj, nodeBounded) {
