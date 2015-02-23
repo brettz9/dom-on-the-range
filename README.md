@@ -18,7 +18,7 @@ Currently for the browser only due to there apparently being no Range implementa
 # Todos
 
 1. For `replaceUnbounded`, support `portionMode` (retain|first) as in findAndReplaceDOMText and separate replacement option.
-1. Support callback replacer for replace functions (in place of `replacementNode`).
+1. Support callback replacer for replace functions (in place of `replacementNode`), returning node or string to replace.
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for match and exec (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
