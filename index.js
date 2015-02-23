@@ -708,7 +708,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
             replacements.slice(1).forEach(function (replacement, i) {
                 replacementNode = replacementNode.replace(new RegExp('\\$' + (i + 1), 'g'), replacement);
             });
-            // Todo: deal with $` and $' (preceding, following)
+            // Todo: deal with (non-recursive) $` and $' (preceding, following)
             opts = Object.assign({}, opts, {replacePatterns: false}); // We've already replaced the patterns, so avoid double-replacing
         }
         replaceNode(regex, frag.textContent, node, replacementNode, range, opts);
