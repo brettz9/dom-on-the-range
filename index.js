@@ -726,7 +726,6 @@ function replaceBounded (regex, node, opts, replacementNode) {
 }
 
 /**
-*@todo For portion, allow retain, first, and encapsulate (if results all share a single common parent and only one wrapper is desired)
 */
 function replaceUnbounded (regex, node, opts, replacementNode) {
     regex = getRegex(regex);
