@@ -684,16 +684,14 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
         node = getNode(node).cloneNode(true);
     }
     replacementNode = getNode(opts.replacement || replacementNode);
+    var regexGlobalState = regex.global;
     
-    if (regex.global) {
-        var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range'}));
-        matchedRanges.forEach(function (matchedRange) {
-            
-        });
-    }
-    else { // Todo: Implement execUnbounded
+    var matchedRanges = matchUnbounded(globalCloneRegex(regex), node, Object.assign({}, opts, {returnType: 'range'}));
+    matchedRanges.every(function (matchedRange) {
         
-    }
+        return regexGlobalState;
+    });
+    return node;
 }
 
 /**
