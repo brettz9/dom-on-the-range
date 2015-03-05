@@ -22,6 +22,26 @@ Currently for the browser only due to there apparently being no Range implementa
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
+1. For match and exec, when `copyAncestors` is set to `true`, allow
+`ancestorExclusions` option set to function (return `false` to exclude) or an array (defaults to
+`['html', 'body']`) or a predefined string (e.g., `"block"` to exclude all known HTML/SVG/MathML block elements)
+    1. Config on whether to create fragment or throw error if parent not found per `ancestorExclusison`
+    1. Code:
+```js
+var p, par;
+node = range.commonAncestorContainer; // ?
+while ((p = p.parentNode) !== null && ) {
+    par = p.cloneNode(false);
+    par.appendChild(node);
+    node = par;
+}
+// Use node
+```
+1. Option for match/exec to `extract:true`, so the matches are removed from the original DOM tree as
+well as being returned as values (the same might be done with `split` too, but this seems to be an unlikely
+use case). Make this extracting behavior non-default, but give alias functions `extractMatch`/`extractExec`. Also
+make a plain text version (modifying property of a supplied object or return an array of string and extracted).
+1. For match/exec/split, add an option to remove elements rendered empty by extraction (as in `parentNode.textContent.length === el.nodeValue.length`)
 
 1. Add preceding/following options to `matchBounded`, `execBounded`, `matchUnbounded`.
 1. Try making bounded functions dependencies of matchBounded?
