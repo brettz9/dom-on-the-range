@@ -114,7 +114,7 @@ function searchPositions (str, regex, returnEnd) {
 // Todo all of the below (node-bounded and node-unbounded versions)!
 
 function replaceNode (regex, text, node, replacementNode, range, opts) {
-    var r, newNode, clone, wrapper;
+    var r, newNode, newNodeStr = null, clone, wrapper;
     var wrap = opts.wrap; // boolean/Element: whether to see replacementNode string as element name instead of text node content
     var replaceFormat = opts.replaceFormat; // "text", "html"
     var replacePatterns = opts.replacePatterns; // true, false
@@ -122,29 +122,29 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
 
     switch (typeof replacementNode) {
     case 'string':
-        newNode = text.replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
+        newNodeStr = text.replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
         break;
     case 'function':
         if (customReplaceMode) {
-            newNode = replacementNode(text, regex, node);
+            newNodeStr = replacementNode(text, regex, node);
         }
         else {
-            newNode = text.replace(regex, replacementNode);
+            newNodeStr = text.replace(regex, replacementNode);
         }
         break;
     default:
         newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
         break;
     }
-    if (typeof newNode === 'string') {
+    if (newNodeStr !== null) {
         switch (replaceFormat) {
             case 'html':
                 r = document.createRange();
                 r.selectNodeContents(node);
-                newNode = r.createContextualFragment(newNode);
+                newNode = r.createContextualFragment(newNodeStr);
                 break;
             case 'text': default:
-                newNode = getNode(newNode);
+                newNode = getNode(newNodeStr);
                 break;
         }
     }
