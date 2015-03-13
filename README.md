@@ -17,7 +17,7 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for whole match and portion (and index of portion among portions and startIndex/endIndex) to return node or string for replacement.
+1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for whole match (and index of portion among portions and startIndex/endIndex) and portion (with node/index/text/indexInMatch/indexInNode/endIndexInNode/isEnd) to return node or string for replacement.
 
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
