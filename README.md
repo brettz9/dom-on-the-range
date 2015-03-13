@@ -17,11 +17,19 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. Option for "single" `portionMode` to only operate when it does not overlap with closing element node
-1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for portion (and index of portion among portions) and whole match and to return node or string for replacement.
+1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for whole match and portion (and index of portion among portions and startIndex/endIndex) to return node or string for replacement.
+
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
+1. Add preceding/following options to `matchBounded`, `execBounded`, `matchUnbounded`.
+
+1. Option for match/exec to `extract:true`, so the matches are removed from the original DOM tree as
+well as being returned as values (the same might be done with `split` too, but this seems to be an unlikely
+use case). Make this extracting behavior non-default, but give alias functions `extractMatch`/`extractExec`. Also
+make a plain text version (modifying property of a supplied object or return an array of string and extracted).
+1. Option for "single" `portionMode` to only operate when it does not overlap with closing element node
+1. For match/exec/split, add an option to remove elements rendered empty by extraction (as in `parentNode.textContent.length === el.nodeValue.length`)
 1. For match and exec, when `copyAncestors` is set to `true`, allow
 `ancestorExclusions` option set to function (return `false` to exclude) or an array (defaults to
 `['html', 'body']`) or a predefined string (e.g., `"block"` to exclude all known HTML/SVG/MathML block elements)
@@ -37,13 +45,6 @@ while ((p = p.parentNode) !== null && ) {
 }
 // Use node
 ```
-1. Option for match/exec to `extract:true`, so the matches are removed from the original DOM tree as
-well as being returned as values (the same might be done with `split` too, but this seems to be an unlikely
-use case). Make this extracting behavior non-default, but give alias functions `extractMatch`/`extractExec`. Also
-make a plain text version (modifying property of a supplied object or return an array of string and extracted).
-1. For match/exec/split, add an option to remove elements rendered empty by extraction (as in `parentNode.textContent.length === el.nodeValue.length`)
-
-1. Add preceding/following options to `matchBounded`, `execBounded`, `matchUnbounded`.
 1. Try making bounded functions dependencies of matchBounded?
 
 1. Get `splitUnbounded`, `execUnbounded` (as already done for `matchUnbounded` and `replaceUnbounded`) to work
