@@ -115,13 +115,28 @@ function searchPositions (str, regex, returnEnd) {
 
 function replaceNode (regex, text, node, replacementNode, range, opts) {
     var r, newNode, clone, wrapper;
-    var wrap = opts.wrap; // boolean: whether to see replacementNode string as element name instead of text node content
+    var wrap = opts.wrap; // boolean/Element: whether to see replacementNode string as element name instead of text node content
     var replaceFormat = opts.replaceFormat; // "text", "html"
     var replacePatterns = opts.replacePatterns; // true, false
-    
+    var customReplaceMode = opts.replaceMode === 'custom';
+
     switch (typeof replacementNode) {
     case 'string':
         newNode = text.replace(cloneRegex(regex), (replacePatterns ? replacementNode : escapeRegexReplace(replacementNode)));
+        break;
+    case 'function':
+        if (customReplaceMode) {
+            newNode = replacementNode(text, regex, node);
+        }
+        else {
+            newNode = text.replace(regex, replacementNode);
+        }
+        break;
+    default:
+        newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
+        break;
+    }
+    if (typeof newNode === 'string') {
         switch (replaceFormat) {
             case 'html':
                 r = document.createRange();
@@ -132,13 +147,6 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
                 newNode = getNode(newNode);
                 break;
         }
-        break;
-    case 'function':
-        newNode = text.replace(regex, replacementNode);
-        break;
-    default:
-        newNode = replacementNode.cloneNode(true); // We need to clone in case multiple replaces are required
-        break;
     }
     if (wrap) { // boolean: whether to see replacementNode string as element name instead of text node content (surroundContents)
         if (wrap.nodeType) {
