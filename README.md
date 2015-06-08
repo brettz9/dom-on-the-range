@@ -17,8 +17,6 @@ Currently for the browser only due to there apparently being no Range implementa
 
 # Todos
 
-1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for whole match (and index of portion among portions and startIndex/endIndex) and portion (with node/index/text/indexInMatch/indexInNode/endIndexInNode/isEnd) to return node or string for replacement.
-
 1. Allow returning node array as a single joined DOM fragment or string.
 1. Allow returning of ranges or nodes for all match and exec functions (as well as strings).
 1. Allow grabbing entire node in which content was found (or a boolean indicating found) or range covering only the text matched.
@@ -55,6 +53,7 @@ http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a
     1. For `replaceUnbounded`, test replacement patterns, including preceding/following replacements (e.g., `$'`).
     1. For `replaceUnbounded`, test `portionMode`'s (multiple|single|first) and separate replacement option.
     1. Test `forEachUnbounded`.
+    1. Support callback replacer for replace functions (in place of `replacementNode`), providing arguments for whole global exec match (with `index` (if global, increment; otherwise 0) of portion among portions and `startIndex`/`endIndex`) and portion (with `node`/`index`/`text`/`indexInMatch`/`indexInNode`/`endIndexInNode`/`isEnd`) to return node or string for replacement.
 
 # Possible todos
 
@@ -63,3 +62,4 @@ http://softwarerecs.stackexchange.com/questions/16611/translating-a-regex-into-a
 1. Add `filterTextNodes`, etc. as with `filterElements`?
 1. Add `filterElements` for test and search methods and for `searchType` "text" with matchUnbounded?
 1. Support `revert` as in findAndReplaceDOMText.
+1. See code for other todos
