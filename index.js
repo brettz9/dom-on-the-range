@@ -126,7 +126,7 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
         break;
     case 'function':
         if (customReplaceMode) {
-            newNodeStr = replacementNode(text, regex, node);
+            newNodeStr = replacementNode(text.match(regex), {index: 0, startIndex: 0, endIndex: 0}, node);
         }
         else {
             newNodeStr = text.replace(regex, replacementNode);
@@ -166,6 +166,25 @@ function replaceNode (regex, text, node, replacementNode, range, opts) {
         range.insertNode(newNode);
     }
     return newNode;
+}
+
+
+function returnBySetType (ret, opts) {
+    switch (opts.setType) {
+        case 'node':
+            return ret && ret.reduce(function (tn, match) {
+                tn.data += match;
+                return tn;
+            }, document.createTextNode());
+        case 'string':
+            return ret && ret.reduce(function (str, match) {
+                str += match;
+                return str;
+            }, '');
+            return ret;
+        case 'array': default:
+            return ret;
+    }
 }
 
 /**
@@ -246,17 +265,16 @@ function splitBounded (regex, node, opts) {
         }));
     }
     var ret = cloneInnerMatches(range, regex, node);
-    if (opts && opts.returnType) {
+    if (opts.returnType) {
         switch (opts.returnType) {
             case 'html':
-                return htmlStringify(ret);
+                ret = htmlStringify(ret);
             case 'text':
-                return textStringify(ret);
-            case 'fragment': case 'range':
-                return ret;
+                ret = textStringify(ret);
+            // case 'fragment': case 'range': default:
         }
     }
-    return ret;
+    return returnBySetType(ret, opts);
 }
 
 function splitUnbounded (regex, node, opts) {
@@ -558,7 +576,8 @@ function matchBounded (regex, node, opts) {
         }));
     }
     var innerMatches = findInnerMatches(regex, node);
-    return flatten ? innerMatches : innerMatches[0]; // Deal with extra array that we created
+    var ret = (flatten || !innerMatches) ? innerMatches : innerMatches[0]; // Deal with extra array that we created
+    return returnBySetType(ret, opts);
 }
 
 function matchUnbounded (regex, node, opts) {
