@@ -3,7 +3,8 @@
 var exports, cloneRegex, handleNode, document, window;
 (function (undef) {'use strict';
 
-if (exports) { // Todo: Implement pseudo-Range for jsdom to get working with Node.js or wait on https://github.com/tmpvar/jsdom/issues/317
+if (exports) { // Todo: Implement pseudo-Range for jsdom to get working with
+               // Node.js or wait on https://github.com/tmpvar/jsdom/issues/317
     cloneRegex = require('regexp-clone');
     handleNode = require('handle-node');
     document = require('jsdom').jsdom('');
@@ -529,7 +530,6 @@ function exec (regex, node, opts, nodeBounded) {
     return execUnbounded(regex, node, opts);
 }
 
-// Todo: For match() (and exec() and forEach, etc.), provide option to actually split up the regular expression source between parenthetical groups (non-escaped parentheses) to make subexpression matches available as nodes (though might also just want strings too); also give option to grab parent element with or without other text contents
 /**
 * If the supplied regular expression is not global, the results will be as with execBounded().
 * @param {Node} node The node out of which to split
@@ -537,6 +537,12 @@ function exec (regex, node, opts, nodeBounded) {
 * @param {object} [opts] Options object
 * @param {boolean} [opts.flatten=true] = Whether or not to flatten the per-node array results of a global search together
 * @returns {array} An array or array of arrays (depending on the flatten value) containing the matches.
+* @todo For match() (and exec() and forEach, etc.), provide option to
+        actually split up the regular expression source between
+        parenthetical groups (non-escaped parentheses) to make
+        subexpression matches available as nodes (though might also
+        just want strings too); also give option to grab parent
+        element with or without other text contents
 */
 function matchBounded (regex, node, opts) {
     regex = getRegex(regex);
@@ -813,7 +819,10 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
                                 // We need to handle whole portion replacements here ourselves
                                 replacementNode = replacementNode.replace(/\$0/g, node.nodeValue);
                             }
-                            // Todo: any way to operate on original DOM with new range and thus no need to call deleteContents/insertNode below (or to replaceChild)? Apparently not as range.commonAncestorContainer would get too much
+                            // Todo: any way to operate on original DOM with new range and thus
+                            //        no need to call deleteContents/insertNode below (or to
+                            //        replaceChild)? Apparently not as
+                            //        range.commonAncestorContainer would get too much
                             var newNode = replaceNode(/^[\s\S]*$/, contents, node, replacementNode, false, opts);
                             node.parentNode.replaceChild(newNode, node);
                             return true;
@@ -892,7 +901,9 @@ exp.htmlStringify = htmlStringify;
 exp.searchPositions = searchPositions;
 
 // MAIN API EXPORTS
-// Todo: export a constructor which allows default regex (and/or node?) and allows determination of whether to match text within node or across nodes
+// Todo: export a constructor which allows default regex (and/or
+//        node?) and allows determination of whether to match
+//        text within node or across nodes
 exp.splitUnbounded = splitUnbounded;
 exp.splitBounded = splitBounded;
 exp.split = split;
