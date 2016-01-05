@@ -194,7 +194,16 @@ function returnBySetType (ret, opts) {
 * @param {object} [opts] Options object
 * @param {"html"|"text"|"dom"} [opts.returnType=dom] Set to "html" to convert text nodes or fragments into HTML strings, "text" for strings, and "dom" for the default
 * @returns {Text|Array}
-* @todo: Fix this description for returns to be accurate! If nothing is found and a text node is supplied, the text node will be returned; if nothing is found with an element supplied, an empty array will be returned; otherwise if nothing is found; undefined will be returned. If an element is supplied and a match is found, an array of nodes on either side of the regex will be returned; if a text node and a match is found, an object will be created whose "pre" property will be set to the portion of text before the regex match (with the matching regex's removed) and whose "post" property will be set to the remainder after the match.
+* @todo: Fix this description for returns to be accurate! If nothing is found
+          and a text node is supplied, the text node will be returned; if
+          nothing is found with an element supplied, an empty array will be
+          returned; otherwise if nothing is found; undefined will be returned.
+          If an element is supplied and a match is found, an array of nodes on
+          either side of the regex will be returned; if a text node and a match
+          is found, an object will be created whose "pre" property will be set
+          to the portion of text before the regex match (with the matching regex's
+          removed) and whose "post" property will be set to the remainder after
+          the match.
 * @todo We could add an argument to allow splitting which adds the split nodes
 * @todo Give option to add to fragment instead of array
 * @todo Give options to search within comments, etc.?
