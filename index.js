@@ -279,11 +279,11 @@ function splitBounded (regex, node, opts) {
 
 function splitUnbounded (regex, node, opts) {
     var range = document.createRange();
-    
+
     regex = getSplitSafeRegex(regex);
-    
+
     // Todo
-    
+
 }
 
 function split (regex, node, opts, nodeBounded) {
@@ -298,7 +298,7 @@ function split (regex, node, opts, nodeBounded) {
 function testBounded (regex, node) {
     regex = getRegex(regex);
     // node = node.cloneNode(true); // Use this if altering node
-    
+
     function findInnerMatches (regex, node) {
         function findMatches (node) {
             return findInnerMatches(regex, node);
@@ -348,7 +348,7 @@ function test (regex, node, nodeBounded) {
 function searchBounded (regex, node, opts) {
     regex = getRegex(regex);
     // node = node.cloneNode(true); // Use this if altering node
-    
+
     var findInnerMatches = regex.global ?
         function (regex, node) {
             function findMatches (arr, node) {
@@ -464,7 +464,7 @@ function execBounded (regex, node, opts) {
                 text: function (node) {
                     var contents = node.nodeValue;
                     var execArr, execArrs = [];
-                    
+
                     while ((execArr = regex.exec(contents)) !== null) {
                         execArr.lastIndex = regex.lastIndex; // Copy if desired for any reason
                         // Todo: Add and copy cumulative index here too?
@@ -518,7 +518,7 @@ function execBounded (regex, node, opts) {
 
 function execUnbounded (regex, node, opts) {
     regex = getRegex(regex); // Todo: drop global as with split?
-    
+
 }
 
 function exec (regex, node, opts, nodeBounded) {
@@ -547,7 +547,7 @@ function matchBounded (regex, node, opts) {
     if (!regex.global) {
         return execBounded(regex, node, opts);
     }
-    
+
     function findInnerMatches (regex, node) {
         function findMatches (arr, node) {
             var found = findInnerMatches(regex, node);
@@ -741,7 +741,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
                     range.setEnd(node, matchEnd);
 
                     replaceNode(regex, text, node, replacementNode, range, opts);
-                    
+
                     if (!regex.global) {
                         break;
                     }
@@ -751,7 +751,7 @@ function replaceBounded (regex, node, opts, replacementNode) {
         }));
     }
     replaceInnerMatches(regex, node);
-    
+
     return node;
 }
 
@@ -767,7 +767,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
     replacementNode = opts.replacement || replacementNode;
     var portionMode = opts.portionMode || 'multiple'; // multiple|first|single
     var replacePortionPattern = opts.replacePortionPattern; // boolean
-    
+
     var matchedRanges = matchUnbounded(regex, node, Object.assign({}, opts, {returnType: 'range', preceding: 'html', following: 'html'})) || [];
     if (!regex.global) {
         matchedRanges = matchedRanges.splice(0, 1);
@@ -798,7 +798,7 @@ function replaceUnbounded (regex, node, opts, replacementNode) {
             method = method || 'forEach';
             matchedRanges.forEach(function (range) {
                 var frag = range.cloneContents();
-                
+
                 function replaceInnerMatches (regex, node) {
                     function replaceMatches (node) {
                         return replaceInnerMatches(regex, node);
@@ -845,7 +845,7 @@ function replace (regex, node, replacementNode, opts, nodeBounded) {
 
 function forEachBounded (regex, node, cb, thisObj) {
     regex = getRegex(regex);
-    
+
     var matches, n0, i = 0;
     thisObj = thisObj || null;
     while ((matches = execBounded(regex, node)) !== null) {
