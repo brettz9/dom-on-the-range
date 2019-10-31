@@ -1,64 +1,68 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
-    <title>DOM-on-the-Range Testing</title>
-    <script src="../node_modules/regexp-clone/index.js"></script>
-    <script src="../node_modules/handle-node/index.js"></script>
-    <script src="../index.js"></script>
-    <script>
+  <meta charset="utf-8" />
+  <title>DOM-on-the-Range Testing</title>
+  <script src="../node_modules/regexp-clone/index.js"></script>
+  <script src="../node_modules/handle-node/index.js"></script>
+  <script src="../index.js"></script>
+  <script>
+/* globals DOTR */
+'use strict';
+
 window.addEventListener('DOMContentLoaded', function () {
+  const regex = /t(e.)t/g;
 
-var regex = /t(e.)t/g;
+  console.log(DOTR.execBounded(regex, document.body, {flatten: false}));
+  console.log(DOTR.execBounded(regex, document.body, {flatten: false}));
+  console.log(JSON.stringify(
+    DOTR.execBounded(regex, document.body, {flatten: false, all: false})
+  ));
 
-/*
-alert(DOTR.execBounded(regex, document.body, {flatten: false}))
-alert(DOTR.execBounded(regex, document.body, {flatten: false}))
-alert(JSON.stringify(
-    DOTR.execBounded(regex, document.body, {flatten: false, all:false}))
-);
-*/
+  let s = '';
+  DOTR.forEachBounded(/t(e.)t/g, document.body, function (a, b, c) {
+    s += this.a + '::' + a + '::' + b + '::' + c + '\n';
+  }, {a: 'newThis'});
+  console.log(s);
 
-/*
-var s = '';
-DOTR.forEachBounded(/t(e.)t/g, document.body, function (a, b, c) {
-    s+= this.a + '::' + a + '::' + b + '::' + c + '\n';
-}, {a: 'newThis'});
-alert(s);
-*/
-/*
+  /*
 newThis::es::0::test
 newThis::eS::1::teSt
 newThis::es::2::test
 */
-var x;
-alert( // document.body.appendChild(
+  console.log( // document.body.appendChild(
     // JSON.stringify
-    (x = 
-        // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
-        // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
-        // DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["teSt"]], [["test"]]  ]
-        // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: false, all: true}) // [  [["test", "es"]], [[["teSt", "eS"]]], [[["test", "es"]]]  ]
-        // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: true, all: true}) // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
-        // DOTR.execBounded(regex, document.body, {flatten: false, all: false}).lastIndex // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
-        // DOTR.execBounded(regex, document.body, {flatten: false}) // ["test","es"]
-        
-        // DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
-        
-        // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
-        // DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'range'}) //
-        DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {replacement: '<u>DONE$1EE</u>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true, replacePatternsHTML: false, portionMode: 'multiple'})
-    )
-    /**
-    .reduce(function (s, frag) {
-        if (frag) {
-        return s + new XMLSerializer().serializeToString(frag) + ';';
-        } else {return s+'(empty)';}
-    }, '')
-    //*/
-    // .outerHTML
-);
-// alert(new XMLSerializer().serializeToString(document.body));
+    // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
+    // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
+    // DOTR.matchBounded(/te.t/g, document.body, {flatten: false}) // [  ["test"], [["teSt"]], [["test"]]  ]
+    // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: false, all: true}) // [  [["test", "es"]], [[["teSt", "eS"]]], [[["test", "es"]]]  ]
+    // DOTR.execBounded(/t(e.)t/g, document.body, {flatten: true, all: true}) // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
+    // DOTR.execBounded(regex, document.body, {flatten: false, all: false}).lastIndex // [  ["test", "es"], ["teSt", "eS"], ["test", "es"]  ]
+    // DOTR.execBounded(regex, document.body, {flatten: false}) // ["test","es"]
+
+    // DOTR.replaceBounded(regex, document.body, {replacement: '<b>DONE$1EE</b>', replaceFormat: 'html'/*text|html*/, replacePatterns: true, wrap: 'q', replaceNode: true})
+
+    // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
+    // DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'range'}) //
+    DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {
+      replacement: '<u>DONE$1EE</u>',
+      replaceFormat: 'html'/* text|html */,
+      replacePatterns: true,
+      wrap: 'q',
+      replaceNode: true,
+      replacePatternsHTML: false,
+      portionMode: 'multiple'
+    })
+  /**
+  .reduce(function (s, frag) {
+    if (frag) {
+    return s + new XMLSerializer().serializeToString(frag) + ';';
+    } else {return s+'(empty)';}
+  }, '')
+  // */
+  // .outerHTML
+  );
+  // alert(new XMLSerializer().serializeToString(document.body));
 });
 </script>
 </head>

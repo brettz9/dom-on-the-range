@@ -56,12 +56,12 @@ markup won't wander away..."
     2.  Code:
 
 ```js
-var p, par;
-node = range.commonAncestorContainer; // ?
-while ((p = p.parentNode) !== null && ) {
-    par = p.cloneNode(false);
-    par.appendChild(node);
-    node = par;
+let p, par;
+let node = range.commonAncestorContainer; // ?
+while ((p = p.parentNode) !== null) { //  && ?
+  par = p.cloneNode(false);
+  par.append(node);
+  node = par;
 }
 // Use node
 ```
