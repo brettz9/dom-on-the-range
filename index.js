@@ -549,7 +549,7 @@ function execUnbounded (regex, node, opts) {
 
   // Todo: use `regex` (and fix `return`)
   console.log('regex', regex);
-  return undefined;
+  return '';
 }
 
 function exec (regex, node, opts, nodeBounded) {
@@ -936,7 +936,7 @@ function forEach (regex, node, cb, thisObj, nodeBounded) {
 // EXPORTS
 
 let exp;
-if (exports === undefined) {
+if (typeof exports === 'undefined') {
   window.DOTR = {};
   exp = window.DOTR;
 } else {
