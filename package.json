@@ -19,7 +19,7 @@
     "regexp-clone": "git+https://git@github.com/brettz9/regexp-clone#master",
     "handle-node": "git+https://git@github.com/brettz9/handle-node#master",
     "rangy": "1.x",
-    "jsdom": "15.x"
+    "jsdom": "16.x"
   },
   "homepage": "https://github.com/brettz9/dom-on-the-range",
   "engines": {
