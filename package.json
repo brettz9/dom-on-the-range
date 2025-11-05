@@ -1,30 +1,38 @@
 {
   "name": "dotr",
-  "title": "DOM on the Range",
-  "id": "dom-on-the-range@brett.zamir",
   "version": "0.1.0",
-  "main": "index.js",
+  "type": "module",
+  "main": "src/index.js",
+  "exports": {
+    ".": {
+      "browser": "./src/index-browser.js",
+      "node": "./src/index-node.js"
+    },
+    "./index.js": "./src/index.js"
+  },
   "license": "MIT",
   "author": "Brett Zamir",
   "contributors": [],
   "scripts": {
+    "prepublishOnly": "pnpm i && tsc -p tsconfig-prod.json",
+    "tsc": "tsc",
+    "start": "static -p 8040",
+    "lint": "pnpm eslint",
     "eslint": "eslint --ext=js,html,md .",
-    "test": "npm run eslint"
+    "mocha": "mocha",
+    "test": "npm run eslint && npm run mocha"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/brettz9/dom-on-the-range.git"
   },
-  "dependencies": {
-    "regexp-clone": "git+https://git@github.com/brettz9/regexp-clone#master",
-    "handle-node": "git+https://git@github.com/brettz9/handle-node#master",
-    "rangy": "1.x",
-    "jsdom": "15.x"
-  },
   "homepage": "https://github.com/brettz9/dom-on-the-range",
   "engines": {
-    "node": ">=8.3.0"
+    "node": ">=22.16.0"
   },
+  "browserslist": [
+    "last 2 chrome versions"
+  ],
   "bugs": "https://github.com/brettz9/dom-on-the-range/issues",
   "description": "Converts regular expressions into safe DOM ranges",
   "keywords": [
@@ -32,24 +40,20 @@
     "range",
     "regex"
   ],
+  "dependencies": {
+    "clone-regexp": "^3.0.0",
+    "handle-node": "0.6.0",
+    "is-regexp": "^3.1.0",
+    "jsdom": "27.x",
+    "rangy": "1.x"
+  },
   "devDependencies": {
-    "@mysticatea/eslint-plugin": "^12.0.0",
-    "eslint": "^6.6.0",
-    "eslint-config-ash-nazg": "^11.0.1",
-    "eslint-config-standard": "^14.1.0",
-    "eslint-plugin-array-func": "^3.1.3",
-    "eslint-plugin-compat": "^3.3.0",
-    "eslint-plugin-eslint-comments": "^3.1.2",
-    "eslint-plugin-html": "^6.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "eslint-plugin-jsdoc": "^15.12.2",
-    "eslint-plugin-markdown": "^1.0.1",
-    "eslint-plugin-no-use-extend-native": "^0.4.1",
-    "eslint-plugin-node": "^10.0.0",
-    "eslint-plugin-promise": "^4.2.1",
-    "eslint-plugin-sonarjs": "^0.4.0",
-    "eslint-plugin-standard": "^4.0.1",
-    "eslint-plugin-unicorn": "^12.1.0",
-    "typescript": "^3.6.4"
+    "@node-static/node-static": "^0.8.0",
+    "@types/jsdom": "^27.0.0",
+    "chai": "^6.2.0",
+    "eslint": "^9.39.1",
+    "eslint-config-ash-nazg": "^39.7.1",
+    "mocha": "^11.7.5",
+    "typescript": "^5.9.3"
   }
 }

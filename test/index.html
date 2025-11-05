@@ -1,17 +1,23 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 <head>
   <meta charset="utf-8" />
   <title>DOM-on-the-Range Testing</title>
-  <script src="../node_modules/regexp-clone/index.js"></script>
-  <script src="../node_modules/handle-node/index.js"></script>
-  <script src="../index.js"></script>
-  <script>
-/* globals DOTR */
-'use strict';
+  <script type="importmap">
+    {
+      "imports": {
+        "clone-regexp": "../node_modules/clone-regexp/index.js",
+        "handle-node": "../node_modules/handle-node/dist/index-esm.min.js",
+        "is-regexp": "../node_modules/is-regexp/index.js"
+      }
+    }
+  </script>
+  <script type="module">
+/* eslint-disable no-console -- Testing */
+import * as DOTR from '../src/index-browser.js';
 
-window.addEventListener('DOMContentLoaded', function () {
-  const regex = /t(e.)t/g;
+globalThis.addEventListener('DOMContentLoaded', function () {
+  const regex = /t(e.)t/gv;
 
   console.log(DOTR.execBounded(regex, document.body, {flatten: false}));
   console.log(DOTR.execBounded(regex, document.body, {flatten: false}));
@@ -20,7 +26,7 @@ window.addEventListener('DOMContentLoaded', function () {
   ));
 
   let s = '';
-  DOTR.forEachBounded(/t(e.)t/g, document.body, function (a, b, c) {
+  DOTR.forEachBounded(/t(e.)t/gv, document.body, function (a, b, c) {
     s += this.a + '::' + a + '::' + b + '::' + c + '\n';
   }, {a: 'newThis'});
   console.log(s);
@@ -31,6 +37,7 @@ newThis::eS::1::teSt
 newThis::es::2::test
 */
   console.log( // document.body.appendChild(
+    /* eslint-disable @stylistic/max-len -- Long */
     // JSON.stringify
     // DOTR.splitBounded(/te.t/, document.body, {returnType: 'html'}) // ["\n\n<p>This is a </p>","<p> <b>and another </b></p>","<p><b></b> and yet another <i></i></p>"]
     // DOTR.matchBounded(/te.t/g, document.body, {flatten: true})[0] // "test"
@@ -44,7 +51,8 @@ newThis::es::2::test
 
     // DOTR.searchBounded(regex, document.body, {stringOffsets: true})
     // DOTR.matchUnbounded(/te.t.*? and/g, document.body, {returnType: 'range'}) //
-    DOTR.replaceUnbounded(/te(.t.*? and)/g, document.body, {
+    /* eslint-enable @stylistic/max-len -- Long */
+    DOTR.replaceUnbounded(/te(.t.*? and)/gv, document.body, {
       replacement: '<u>DONE$1EE</u>',
       replaceFormat: 'html'/* text|html */,
       replacePatterns: true,
@@ -53,7 +61,7 @@ newThis::es::2::test
       replacePatternsHTML: false,
       portionMode: 'multiple'
     })
-  /**
+  /*
   .reduce(function (s, frag) {
     if (frag) {
     return s + new XMLSerializer().serializeToString(frag) + ';';

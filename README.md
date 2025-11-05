@@ -14,7 +14,25 @@ markup won't wander away..."
 
 ## Installation
 
+```shell
+npm i dom-on-the-range
+```
+
 ## Usage
+
+```js
+import * as DOTR from 'dom-on-the-range';
+
+DOTR.replaceUnbounded(/te(.t.*? and)/gv, document.body, {
+  replacement: '<u>DONE$1EE</u>',
+  replaceFormat: 'html'/* text|html */,
+  replacePatterns: true,
+  wrap: 'q',
+  replaceNode: true,
+  replacePatternsHTML: false,
+  portionMode: 'multiple'
+});
+```
 
 ## To-dos
 
@@ -92,6 +110,8 @@ while ((p = p.parentNode) !== null) { //  && ?
         portion among portions and `startIndex`/`endIndex`) and portion
         (with `node`/`index`/`text`/`indexInMatch`/`indexInNode`/
         `endIndexInNode`/`isEnd`) to return node or string for replacement.
+
+12. Compare to <https://github.com/padolsey/findAndReplaceDOMText>.
 
 ## Possible to-dos
 
