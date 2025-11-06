@@ -49,7 +49,9 @@
   },
   "devDependencies": {
     "@node-static/node-static": "^0.8.0",
+    "@types/chai": "^5.2.3",
     "@types/jsdom": "^27.0.0",
+    "@types/mocha": "^10.0.10",
     "chai": "^6.2.0",
     "eslint": "^9.39.1",
     "eslint-config-ash-nazg": "^39.7.1",
